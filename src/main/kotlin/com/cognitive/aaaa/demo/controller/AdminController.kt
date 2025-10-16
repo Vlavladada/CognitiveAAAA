@@ -1,7 +1,7 @@
 package com.cognitive.aaaa.demo.controller
 
 import com.cognitive.aaaa.demo.model.*
-import com.cognitive.aaaa.demo.service.SupabaseService
+import com.cognitive.aaaa.demo.repository.*
 import com.cognitive.aaaa.demo.service.AuthenticationService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -12,20 +12,22 @@ import java.time.LocalDateTime
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
 class AdminController(
-    private val supabaseService: SupabaseService,
+    private val userRepository: UserRepository,
+    private val testSessionRepository: TestSessionRepository,
+    private val testResultsRepository: TestResultsRepository,
     private val authenticationService: AuthenticationService
 ) {
     
     // User Management
     @GetMapping("/users")
     fun getAllUsers(): ResponseEntity<List<User>> {
-        val users = supabaseService.getAllUsers()
+        val users = userRepository.findAll()
         return ResponseEntity.ok(users)
     }
     
     @GetMapping("/users/{userId}")
     fun getUserById(@PathVariable userId: String): ResponseEntity<User?> {
-        val user = supabaseService.getUserById(userId)
+        val user = userRepository.findById(userId).orElse(null)
         return ResponseEntity.ok(user)
     }
     
@@ -34,12 +36,12 @@ class AdminController(
         @PathVariable userId: String,
         @RequestBody roleUpdate: RoleUpdateRequest
     ): ResponseEntity<User> {
-        val user = supabaseService.getUserById(userId)
+        val user = userRepository.findById(userId).orElse(null)
             ?: throw IllegalArgumentException("User not found")
         
-        val updatedUser = user.copy(role = roleUpdate.role)
-        // In a real implementation, you'd save this back to Supabase
-        return ResponseEntity.ok(updatedUser)
+        val updatedUser = user.copy(role = roleUpdate.role, updatedAt = LocalDateTime.now())
+        val savedUser = userRepository.save(updatedUser)
+        return ResponseEntity.ok(savedUser)
     }
     
     @PutMapping("/users/{userId}/status")
@@ -47,43 +49,46 @@ class AdminController(
         @PathVariable userId: String,
         @RequestBody statusUpdate: StatusUpdateRequest
     ): ResponseEntity<User> {
-        val user = supabaseService.getUserById(userId)
+        val user = userRepository.findById(userId).orElse(null)
             ?: throw IllegalArgumentException("User not found")
         
-        val updatedUser = user.copy(isActive = statusUpdate.isActive)
-        // In a real implementation, you'd save this back to Supabase
-        return ResponseEntity.ok(updatedUser)
+        val updatedUser = user.copy(isActive = statusUpdate.isActive, updatedAt = LocalDateTime.now())
+        val savedUser = userRepository.save(updatedUser)
+        return ResponseEntity.ok(savedUser)
     }
     
     // Test Session Management
     @GetMapping("/sessions")
     fun getAllSessions(): ResponseEntity<List<TestSession>> {
-        val sessions = supabaseService.getAllSessions()
+        val sessions = testSessionRepository.findAll()
         return ResponseEntity.ok(sessions)
     }
     
     @GetMapping("/sessions/{sessionId}")
     fun getSessionById(@PathVariable sessionId: String): ResponseEntity<TestSession?> {
-        val session = supabaseService.getSession(sessionId)
+        val session = testSessionRepository.findBySessionId(sessionId).orElse(null)
         return ResponseEntity.ok(session)
     }
     
     @DeleteMapping("/sessions/{sessionId}")
     fun deleteSession(@PathVariable sessionId: String): ResponseEntity<Void> {
-        // In a real implementation, you'd delete from Supabase
+        val session = testSessionRepository.findBySessionId(sessionId).orElse(null)
+        if (session != null) {
+            testSessionRepository.delete(session)
+        }
         return ResponseEntity.ok().build()
     }
     
     // Analytics and Statistics
     @GetMapping("/stats/overview")
     fun getOverviewStats(): ResponseEntity<AdminStats> {
-        val users = supabaseService.getAllUsers()
-        val sessions = supabaseService.getAllSessions()
+        val users = userRepository.findAll()
+        val sessions = testSessionRepository.findAll()
         
         val totalUsers = users.size
         val activeUsers = users.count { it.isActive }
         val totalSessions = sessions.size
-        val completedSessions = sessions.count { it.endTime != null }
+        val completedSessions = sessions.count { it.isCompleted }
         
         val stats = AdminStats(
             totalUsers = totalUsers.toLong(),
@@ -100,15 +105,15 @@ class AdminController(
     fun getUserActivityStats(
         @RequestParam(defaultValue = "7") days: Int
     ): ResponseEntity<List<UserActivityStats>> {
-        val users = supabaseService.getAllUsers()
+        val users = userRepository.findAll()
         val cutoffDate = LocalDateTime.now().minusDays(days.toLong())
         
         val activityStats = users.map { user ->
-            val sessions = supabaseService.getUserSessions(user.id)
+            val sessions = testSessionRepository.findByUserSupabaseUserIdOrderByStartTimeDesc(user.supabaseUserId)
             val recentSessions = sessions.filter { it.startTime.isAfter(cutoffDate) }
             
             UserActivityStats(
-                userId = user.id,
+                userId = user.supabaseUserId,
                 email = user.email,
                 totalTests = user.totalTestsCompleted,
                 recentTests = recentSessions.size,
@@ -122,8 +127,8 @@ class AdminController(
     
     @GetMapping("/stats/sessions/performance")
     fun getSessionPerformanceStats(): ResponseEntity<List<SessionPerformanceStats>> {
-        val sessions = supabaseService.getAllSessions()
-        val completedSessions = sessions.filter { it.endTime != null }
+        val sessions = testSessionRepository.findAll()
+        val completedSessions = sessions.filter { it.isCompleted }
         
         val performanceStats = completedSessions.map { session ->
             val trials = session.trials.filter { it.status == TrialStatus.COMPLETED }
@@ -131,7 +136,7 @@ class AdminController(
             
             SessionPerformanceStats(
                 sessionId = session.sessionId,
-                userId = session.userId,
+                userId = session.user?.supabaseUserId,
                 participantId = session.participantId,
                 startTime = session.startTime,
                 endTime = session.endTime,
@@ -139,7 +144,7 @@ class AdminController(
                 correctTrials = correctTrials.size,
                 accuracy = if (trials.isNotEmpty()) correctTrials.size.toDouble() / trials.size else 0.0,
                 averageResponseTime = if (correctTrials.isNotEmpty()) {
-                    correctTrials.mapNotNull { it.responseTime }.average()
+                    correctTrials.mapNotNull { it.responseTimeMs }.average()
                 } else 0.0
             )
         }
@@ -153,8 +158,10 @@ class AdminController(
         @RequestParam(defaultValue = "30") daysOld: Int
     ): ResponseEntity<CleanupResult> {
         val cutoffDate = LocalDateTime.now().minusDays(daysOld.toLong())
-        val sessions = supabaseService.getAllSessions()
-        val oldSessions = sessions.filter { it.startTime.isBefore(cutoffDate) && it.endTime == null }
+        val sessions = testSessionRepository.findAll()
+        val oldSessions = sessions.filter { it.startTime.isBefore(cutoffDate) && !it.isCompleted }
+        
+        oldSessions.forEach { testSessionRepository.delete(it) }
         
         val result = CleanupResult(
             deletedSessions = oldSessions.size,

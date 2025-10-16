@@ -28,8 +28,6 @@ class TaskSwitchingTest {
     }
     
     async startTest() {
-        const participantId = document.getElementById('participantId').value.trim() || null;
-        
         try {
             // Create session
             const response = await fetch('/api/session', {
@@ -37,7 +35,7 @@ class TaskSwitchingTest {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `participantId=${encodeURIComponent(participantId || '')}`
+                body: ''
             });
             
             if (!response.ok) {
@@ -160,15 +158,14 @@ class TaskSwitchingTest {
     
     showStimulus(containerId, trial) {
         const container = document.getElementById(containerId);
-        const stimulus = trial.stimulus;
         
         // Create stimulus class name
-        const shapeClass = stimulus.shape.toLowerCase();
-        const colorClass = stimulus.color.toLowerCase();
+        const shapeClass = trial.stimulusShape.toLowerCase();
+        const colorClass = trial.stimulusColor.toLowerCase();
         const stimulusClass = `${shapeClass}-${colorClass}`;
         
         // Create stimulus symbol
-        const symbol = stimulus.shape === 'CIRCLE' ? '●' : '■';
+        const symbol = trial.stimulusShape === 'CIRCLE' ? '●' : '■';
         
         container.innerHTML = `
             <div class="stimulus ${stimulusClass}">${symbol}</div>
@@ -212,7 +209,7 @@ class TaskSwitchingTest {
         const containerId = this.currentPhase === 'training' ? 'trainingTrial' : 'testTrial';
         const feedbackElement = document.querySelector(`#${containerId} .feedback`);
         
-        const isCorrect = response === trial.stimulus.correctResponse;
+        const isCorrect = response === trial.correctResponse;
         feedbackElement.textContent = isCorrect ? 'Correct!' : 'Incorrect';
         feedbackElement.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
         feedbackElement.style.display = 'block';
@@ -279,8 +276,9 @@ class TaskSwitchingTest {
             }
             
             const results = await response.json();
-            this.displayResults(results);
-            this.showPhase('results');
+            
+            // Redirect to results page
+            window.location.href = `/results/${this.sessionId}`;
             
         } catch (error) {
             console.error('Error getting results:', error);
@@ -351,7 +349,7 @@ class TaskSwitchingTest {
     
     showPhase(phaseName) {
         // Hide all phases
-        document.querySelectorAll('.phase').forEach(phase => {
+        document.querySelectorAll('.test-phase').forEach(phase => {
             phase.classList.add('hidden');
         });
         
@@ -388,10 +386,7 @@ class TaskSwitchingTest {
         this.trialStartTime = null;
         this.isWaitingForResponse = false;
         
-        // Clear participant ID
-        document.getElementById('participantId').value = '';
-        
-        this.showPhase('instructions');
+        this.showPhase('instructionsPhase');
     }
 }
 

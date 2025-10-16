@@ -10,8 +10,7 @@
     
     <!-- Build-time configuration fallback -->
     <script>
-        window.SUPABASE_URL = /*[[${@environment.getProperty('supabase.url')}]]*/ 'YOUR_SUPABASE_URL';
-        window.SUPABASE_ANON_KEY = /*[[${@environment.getProperty('supabase.anon-key')}]]*/ 'YOUR_SUPABASE_ANON_KEY';
+        // No longer needed - using Spring Security instead of Supabase
     </script>
 </head>
 <body>
@@ -124,14 +123,57 @@
                         
                         <p>A cue will appear before each stimulus to tell you which task to perform.</p>
                         <p>Please respond as quickly and accurately as possible.</p>
+                        
+                        <h3>Controls:</h3>
+                        <ul>
+                            <li>Press <strong>B</strong> for LEFT responses</li>
+                            <li>Press <strong>N</strong> for RIGHT responses</li>
+                        </ul>
                     </div>
                     <button id="startBtn" class="btn btn-primary">Start Test</button>
+                    <button id="viewHistoryBtn" class="btn btn-secondary hidden">View Previous Results</button>
+                </div>
+                
+                <!-- Training Phase -->
+                <div class="test-phase hidden" id="training">
+                    <h2>Training Phase</h2>
+                    <div class="progress">
+                        <div class="progress-bar" id="trainingProgress">
+                            <div class="progress-bar"></div>
+                        </div>
+                        <div class="progress-text">Trial 0 of 16</div>
+                    </div>
+                    <div id="trainingTrial" class="trial-container">
+                        <div class="fixation-point">+</div>
+                    </div>
+                </div>
+                
+                <!-- Test Phase -->
+                <div class="test-phase hidden" id="test">
+                    <h2>Test Phase</h2>
+                    <div class="progress">
+                        <div class="progress-bar" id="testProgress">
+                            <div class="progress-bar"></div>
+                        </div>
+                        <div class="progress-text">Trial 0 of 128</div>
+                    </div>
+                    <div id="testTrial" class="trial-container">
+                        <div class="fixation-point">+</div>
+                    </div>
+                </div>
+                
+                <!-- Previous Results Section -->
+                <div class="test-phase hidden" id="historyPhase">
+                    <h2>Your Previous Results</h2>
+                    <div id="historyContent">
+                        <div class="loading">Loading your test history...</div>
+                    </div>
+                    <button id="backToInstructionsBtn" class="btn btn-secondary">Back to Instructions</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/task-switching.js"></script>
 </body>

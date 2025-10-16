@@ -15,3 +15,7 @@ enum class Response {
 enum class Congruency {
     CONGRUENT, INCONGRUENT
 }
+
+enum class TaskType {
+    COLOR, SHAPE
+}

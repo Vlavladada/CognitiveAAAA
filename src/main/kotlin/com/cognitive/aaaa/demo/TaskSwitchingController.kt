@@ -94,7 +94,7 @@ class TaskSwitchingController(
     fun getUserSessions(): ResponseEntity<List<TestSession>> {
         val user = authenticationService.getCurrentUser()
         return if (user != null) {
-            val sessions = taskSwitchingService.getUserSessions(user.id)
+            val sessions = taskSwitchingService.getUserSessions(user.supabaseUserId)
             ResponseEntity.ok(sessions)
         } else {
             ResponseEntity.ok(emptyList())
