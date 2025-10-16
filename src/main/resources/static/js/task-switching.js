@@ -80,8 +80,8 @@ class TaskSwitchingTest {
             this.showPhase('training');
             this.updateProgress('trainingProgress', 0, this.trials.length);
             
-            // Start first trial after a short delay
-            setTimeout(() => this.runNextTrial(), 1000);
+            // Start first trial after proper preparation time
+            setTimeout(() => this.runNextTrial(), 2000);
             
         } catch (error) {
             console.error('Error starting training:', error);
@@ -106,8 +106,8 @@ class TaskSwitchingTest {
             this.showPhase('test');
             this.updateProgress('testProgress', 0, this.trials.length);
             
-            // Start first trial after a short delay
-            setTimeout(() => this.runNextTrial(), 1000);
+            // Start first trial after proper preparation time
+            setTimeout(() => this.runNextTrial(), 2000);
             
         } catch (error) {
             console.error('Error starting test:', error);
@@ -133,24 +133,26 @@ class TaskSwitchingTest {
         
         this.updateProgress(progressId, this.currentTrialIndex, this.trials.length);
         
-        // Show fixation point
+        // Implement proper timing parameters following psychological best practices
+        // Fixation: 800ms (standard in cognitive testing)
         this.showFixationPoint(containerId);
         
         setTimeout(() => {
-            // Show cue
+            // Cue: 200ms (brief but visible)
             this.showCue(containerId, trial.taskType);
             
             setTimeout(() => {
-                // Clear cue and show stimulus
+                // Clear cue and prepare for stimulus
                 this.clearContainer(containerId);
                 
+                // Cue-Stimulus Interval (CSI): 800ms (allows task preparation)
                 setTimeout(() => {
                     this.showStimulus(containerId, trial);
-                }, 750); // cue delay
+                }, 800);
                 
-            }, 350); // cue display time
+            }, 200); // cue display time
             
-        }, 650); // fixation + delay
+        }, 800); // fixation time
     }
     
     showFixationPoint(containerId) {

@@ -1,5 +1,6 @@
 package com.cognitive.aaaa.demo.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -41,6 +42,7 @@ data class TestSession(
     val isCompleted: Boolean = false,
     
     @OneToMany(mappedBy = "session", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JsonIgnore
     val trials: List<Trial> = emptyList()
 ) {
     constructor() : this(

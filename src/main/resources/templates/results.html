@@ -257,41 +257,109 @@
             
             <div class="interpretation-item">
                 <h4>Overall Accuracy</h4>
-                <p th:if="${results.accuracy >= 90}" class="performance-indicator performance-excellent">Excellent</p>
-                <p th:if="${results.accuracy >= 80 and results.accuracy < 90}" class="performance-indicator performance-good">Good</p>
-                <p th:if="${results.accuracy >= 70 and results.accuracy < 80}" class="performance-indicator performance-average">Average</p>
-                <p th:if="${results.accuracy < 70}" class="performance-indicator performance-poor">Needs Improvement</p>
+                <p th:if="${results.accuracy >= 95}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.accuracy >= 90 and results.accuracy < 95}" class="performance-indicator performance-good">Very Good</p>
+                <p th:if="${results.accuracy >= 85 and results.accuracy < 90}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.accuracy >= 80 and results.accuracy < 85}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.accuracy < 80}" class="performance-indicator performance-poor">Below Average</p>
                 <p>Your accuracy of <strong th:text="${#numbers.formatDecimal(results.accuracy, 1, 1)} + '%'"></strong> indicates 
-                <span th:if="${results.accuracy >= 90}">excellent attention and cognitive control.</span>
-                <span th:if="${results.accuracy >= 80 and results.accuracy < 90}">good cognitive performance with room for improvement.</span>
-                <span th:if="${results.accuracy >= 70 and results.accuracy < 80}">average cognitive performance that could benefit from practice.</span>
-                <span th:if="${results.accuracy < 70}">cognitive performance that may benefit from training and practice.</span></p>
+                <span th:if="${results.accuracy >= 95}">exceptional attention control and cognitive performance, placing you in the top 10% of performers.</span>
+                <span th:if="${results.accuracy >= 90 and results.accuracy < 95}">very good cognitive performance with strong attention control.</span>
+                <span th:if="${results.accuracy >= 85 and results.accuracy < 90}">good cognitive performance with room for improvement.</span>
+                <span th:if="${results.accuracy >= 80 and results.accuracy < 85}">average cognitive performance that could benefit from practice.</span>
+                <span th:if="${results.accuracy < 80}">cognitive performance below typical ranges, suggesting potential benefits from cognitive training.</span></p>
             </div>
             
             <div class="interpretation-item">
-                <h4>Task Switching Ability</h4>
-                <p th:if="${results.switchCost <= 50}" class="performance-indicator performance-excellent">Excellent</p>
-                <p th:if="${results.switchCost > 50 and results.switchCost <= 100}" class="performance-indicator performance-good">Good</p>
+                <h4>Task Switching Ability (Cognitive Flexibility)</h4>
+                <p th:if="${results.switchCost <= 30}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.switchCost > 30 and results.switchCost <= 60}" class="performance-indicator performance-good">Very Good</p>
+                <p th:if="${results.switchCost > 60 and results.switchCost <= 100}" class="performance-indicator performance-good">Good</p>
                 <p th:if="${results.switchCost > 100 and results.switchCost <= 150}" class="performance-indicator performance-average">Average</p>
-                <p th:if="${results.switchCost > 150}" class="performance-indicator performance-poor">Needs Improvement</p>
+                <p th:if="${results.switchCost > 150}" class="performance-indicator performance-poor">Below Average</p>
                 <p>A switch cost of <strong th:text="${#numbers.formatDecimal(results.switchCost, 1, 1)} + ' ms'"></strong> indicates 
-                <span th:if="${results.switchCost <= 50}">excellent cognitive flexibility and task-switching ability.</span>
-                <span th:if="${results.switchCost > 50 and results.switchCost <= 100}">good cognitive flexibility with minimal switching difficulty.</span>
-                <span th:if="${results.switchCost > 100 and results.switchCost <= 150}">moderate difficulty with task switching, which is normal.</span>
-                <span th:if="${results.switchCost > 150}">significant difficulty with task switching that may benefit from practice.</span></p>
+                <span th:if="${results.switchCost <= 30}">exceptional cognitive flexibility and executive control, suggesting superior ability to adapt to changing task demands.</span>
+                <span th:if="${results.switchCost > 30 and results.switchCost <= 60}">very good cognitive flexibility with minimal switching difficulty.</span>
+                <span th:if="${results.switchCost > 60 and results.switchCost <= 100}">good cognitive flexibility with moderate switching costs typical of healthy adults.</span>
+                <span th:if="${results.switchCost > 100 and results.switchCost <= 150}">average cognitive flexibility with some difficulty switching between tasks.</span>
+                <span th:if="${results.switchCost > 150}">below-average cognitive flexibility, suggesting potential benefits from executive function training.</span></p>
             </div>
             
             <div class="interpretation-item">
-                <h4>Interference Control</h4>
-                <p th:if="${results.taskInterference <= 30}" class="performance-indicator performance-excellent">Excellent</p>
-                <p th:if="${results.taskInterference > 30 and results.taskInterference <= 60}" class="performance-indicator performance-good">Good</p>
-                <p th:if="${results.taskInterference > 60 and results.taskInterference <= 100}" class="performance-indicator performance-average">Average</p>
-                <p th:if="${results.taskInterference > 100}" class="performance-indicator performance-poor">Needs Improvement</p>
+                <h4>Interference Control (Selective Attention)</h4>
+                <p th:if="${results.taskInterference <= 20}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.taskInterference > 20 and results.taskInterference <= 40}" class="performance-indicator performance-good">Very Good</p>
+                <p th:if="${results.taskInterference > 40 and results.taskInterference <= 70}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.taskInterference > 70 and results.taskInterference <= 120}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.taskInterference > 120}" class="performance-indicator performance-poor">Below Average</p>
                 <p>An interference effect of <strong th:text="${#numbers.formatDecimal(results.taskInterference, 1, 1)} + ' ms'"></strong> suggests 
-                <span th:if="${results.taskInterference <= 30}">excellent ability to ignore irrelevant information and maintain focus.</span>
-                <span th:if="${results.taskInterference > 30 and results.taskInterference <= 60}">good interference control with minimal distraction effects.</span>
-                <span th:if="${results.taskInterference > 60 and results.taskInterference <= 100}">moderate susceptibility to interference, which is typical.</span>
-                <span th:if="${results.taskInterference > 100}">significant difficulty ignoring irrelevant information, suggesting attention training may be beneficial.</span></p>
+                <span th:if="${results.taskInterference <= 20}">exceptional selective attention and interference control, indicating superior ability to filter out irrelevant information.</span>
+                <span th:if="${results.taskInterference > 20 and results.taskInterference <= 40}">very good interference control with minimal distraction effects.</span>
+                <span th:if="${results.taskInterference > 40 and results.taskInterference <= 70}">good interference control with moderate susceptibility to irrelevant information.</span>
+                <span th:if="${results.taskInterference > 70 and results.taskInterference <= 120}">average interference control with typical susceptibility to distracting information.</span>
+                <span th:if="${results.taskInterference > 120}">below-average interference control, suggesting potential benefits from attention training exercises.</span></p>
+            </div>
+        </div>
+        
+        <!-- Cognitive Assessment Summary -->
+        <div class="interpretation">
+            <h3><span class="material-icons">psychology</span> Cognitive Assessment Summary</h3>
+            
+            <div class="interpretation-item">
+                <h4>Executive Function Profile</h4>
+                <p>This task switching test measures key components of executive function:</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li><strong>Cognitive Flexibility:</strong> Your ability to switch between different mental sets and adapt to changing task demands.</li>
+                    <li><strong>Working Memory:</strong> Your capacity to maintain and manipulate task-relevant information while ignoring distractions.</li>
+                    <li><strong>Inhibitory Control:</strong> Your ability to suppress irrelevant responses and maintain focus on the current task.</li>
+                    <li><strong>Attention Control:</strong> Your capacity to allocate attention appropriately between competing demands.</li>
+                </ul>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Clinical Relevance</h4>
+                <p>Task switching performance is associated with:</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li>Academic and professional success</li>
+                    <li>Problem-solving abilities</li>
+                    <li>Adaptability to new situations</li>
+                    <li>Overall cognitive health and aging</li>
+                </ul>
+                <p><strong>Note:</strong> This test provides a snapshot of your current cognitive abilities. Performance can vary based on factors such as fatigue, stress, motivation, and recent practice. For clinical assessment, multiple testing sessions and additional cognitive measures are typically recommended.</p>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Recommendations</h4>
+                <div th:if="${results.accuracy >= 90 and results.switchCost <= 60 and results.taskInterference <= 40}">
+                    <p class="performance-indicator performance-excellent">Excellent Performance</p>
+                    <p>Your cognitive performance is exceptional. To maintain these abilities:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Continue engaging in mentally challenging activities</li>
+                        <li>Practice mindfulness and meditation</li>
+                        <li>Maintain regular physical exercise</li>
+                        <li>Get adequate sleep and manage stress</li>
+                    </ul>
+                </div>
+                <div th:if="${results.accuracy >= 80 and results.switchCost <= 100 and results.taskInterference <= 70}">
+                    <p class="performance-indicator performance-good">Good Performance</p>
+                    <p>Your cognitive performance is solid. To enhance your abilities:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Practice cognitive training exercises</li>
+                        <li>Engage in new learning activities</li>
+                        <li>Try brain-training apps or puzzles</li>
+                        <li>Maintain a healthy lifestyle</li>
+                    </ul>
+                </div>
+                <div th:if="${results.accuracy < 80 or results.switchCost > 100 or results.taskInterference > 70}">
+                    <p class="performance-indicator performance-average">Room for Improvement</p>
+                    <p>Your cognitive performance could benefit from targeted training:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Consider cognitive training programs</li>
+                        <li>Practice attention and focus exercises</li>
+                        <li>Engage in regular mental challenges</li>
+                        <li>Consult with a healthcare provider if concerned</li>
+                    </ul>
+                </div>
             </div>
         </div>
         

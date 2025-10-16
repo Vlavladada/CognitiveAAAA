@@ -1,5 +1,6 @@
 package com.cognitive.aaaa.demo.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -12,6 +13,7 @@ data class Trial(
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id", nullable = false)
+    @JsonIgnore
     val session: TestSession,
     
     @Column(nullable = false)

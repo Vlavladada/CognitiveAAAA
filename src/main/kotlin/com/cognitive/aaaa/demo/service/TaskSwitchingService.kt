@@ -139,77 +139,191 @@ class TaskSwitchingService(
     }
     
     private fun generateTrials(session: TestSession, isTraining: Boolean): List<Trial> {
-        val trialCount = if (isTraining) 16 else 128 // Training: 16 trials, Test: 128 trials
+        val trialCount = if (isTraining) 24 else 240 // Training: 24 trials, Test: 240 trials (psychologically valid)
         val trials = mutableListOf<Trial>()
         
-        val shapes = Shape.values()
-        val colors = Color.values()
-        val taskTypes = TaskType.values()
+        // Generate balanced trial sequence following psychological best practices
+        val trialSequence = generateBalancedSequence(trialCount, isTraining)
         
-        var previousTaskType: TaskType? = null
-        
-        // Generate trials with proper task switching test design
         for (i in 1..trialCount) {
-            val taskType = if (isTraining) {
-                // Training: alternate between tasks every 4 trials
-                if ((i - 1) / 4 % 2 == 0) TaskType.COLOR else TaskType.SHAPE
-            } else {
-                // Test: 50% switch probability with balanced design
-                if (previousTaskType == null || Math.random() < 0.5) {
-                    taskTypes.random()
-                } else {
-                    previousTaskType
-                }
-            }
-            
-            // Ensure balanced stimulus presentation
-            val shape = if (isTraining) {
-                shapes[i % shapes.size]
-            } else {
-                shapes.random()
-            }
-            
-            val color = if (isTraining) {
-                colors[i % colors.size]
-            } else {
-                colors.random()
-            }
-            
-            val correctResponse = when (taskType) {
-                TaskType.COLOR -> when (color) {
-                    Color.BLUE -> Response.RIGHT
-                    Color.YELLOW -> Response.LEFT
-                }
-                TaskType.SHAPE -> when (shape) {
-                    Shape.CIRCLE -> Response.LEFT
-                    Shape.RECTANGLE -> Response.RIGHT
-                }
-            }
-            
-            val congruency = determineCongruency(taskType, shape, color)
-            val isSwitchTrial = previousTaskType != null && previousTaskType != taskType
+            val trialSpec = trialSequence[i - 1]
             
             val trial = Trial(
                 session = session,
                 trialNumber = i,
-                taskType = taskType,
-                stimulusShape = shape,
-                stimulusColor = color,
-                correctResponse = correctResponse,
-                congruency = congruency,
+                taskType = trialSpec.taskType,
+                stimulusShape = trialSpec.shape,
+                stimulusColor = trialSpec.color,
+                correctResponse = trialSpec.correctResponse,
+                congruency = trialSpec.congruency,
                 status = TrialStatus.PENDING,
                 stimulusOnsetTime = LocalDateTime.now(),
-                isSwitchTrial = isSwitchTrial
+                isSwitchTrial = trialSpec.isSwitchTrial
             )
             
             trials.add(trial)
-            previousTaskType = taskType
         }
         
         return trials
     }
     
-    private fun determineCongruency(_taskType: TaskType, shape: Shape, color: Color): Congruency {
+    private data class TrialSpec(
+        val taskType: TaskType,
+        val shape: Shape,
+        val color: Color,
+        val correctResponse: Response,
+        val congruency: Congruency,
+        val isSwitchTrial: Boolean
+    )
+    
+    private fun generateBalancedSequence(trialCount: Int, isTraining: Boolean): List<TrialSpec> {
+        val trials = mutableListOf<TrialSpec>()
+        val shapes = Shape.values()
+        val colors = Color.values()
+        val taskTypes = TaskType.values()
+        
+        if (isTraining) {
+            // Training: Simple alternating pattern with clear examples
+            for (i in 1..trialCount) {
+                val taskType = if ((i - 1) / 6 % 2 == 0) TaskType.COLOR else TaskType.SHAPE
+                val shape = shapes[(i - 1) % shapes.size]
+                val color = colors[(i - 1) % colors.size]
+                
+                val correctResponse = when (taskType) {
+                    TaskType.COLOR -> when (color) {
+                        Color.BLUE -> Response.RIGHT
+                        Color.YELLOW -> Response.LEFT
+                    }
+                    TaskType.SHAPE -> when (shape) {
+                        Shape.CIRCLE -> Response.LEFT
+                        Shape.RECTANGLE -> Response.RIGHT
+                    }
+                }
+                
+                val congruency = determineCongruency(taskType, shape, color)
+                val isSwitchTrial = i > 1 && trials.last().taskType != taskType
+                
+                trials.add(TrialSpec(taskType, shape, color, correctResponse, congruency, isSwitchTrial))
+            }
+        } else {
+            // Test: Balanced design with proper switch/repeat and congruency distribution
+            val switchProbability = 0.5
+            val congruentProbability = 0.5
+            
+            // Ensure balanced distribution
+            val totalSwitches = (trialCount * switchProbability).toInt()
+            val totalCongruent = (trialCount * congruentProbability).toInt()
+            
+            var switchCount = 0
+            var congruentCount = 0
+            var previousTaskType: TaskType? = null
+            
+            for (i in 1..trialCount) {
+                // Determine if this should be a switch trial
+                val remainingTrials = trialCount - i + 1
+                val remainingSwitches = totalSwitches - switchCount
+                val shouldSwitch = when {
+                    remainingSwitches == remainingTrials -> true
+                    remainingSwitches == 0 -> false
+                    previousTaskType == null -> true
+                    else -> Math.random() < (remainingSwitches.toDouble() / remainingTrials)
+                }
+                
+                val taskType = if (shouldSwitch) {
+                    taskTypes.random()
+                } else {
+                    previousTaskType ?: taskTypes.random()
+                }
+                
+                if (shouldSwitch) switchCount++
+                
+                // Determine congruency
+                val remainingCongruent = totalCongruent - congruentCount
+                val shouldBeCongruent = when {
+                    remainingCongruent == (trialCount - i + 1) -> true
+                    remainingCongruent == 0 -> false
+                    else -> Math.random() < (remainingCongruent.toDouble() / (trialCount - i + 1))
+                }
+                
+                // Generate stimulus that matches desired congruency
+                val (shape, color) = generateStimulusForCongruency(taskType, shouldBeCongruent)
+                
+                if (shouldBeCongruent) congruentCount++
+                
+                val correctResponse = when (taskType) {
+                    TaskType.COLOR -> when (color) {
+                        Color.BLUE -> Response.RIGHT
+                        Color.YELLOW -> Response.LEFT
+                    }
+                    TaskType.SHAPE -> when (shape) {
+                        Shape.CIRCLE -> Response.LEFT
+                        Shape.RECTANGLE -> Response.RIGHT
+                    }
+                }
+                
+                val congruency = determineCongruency(taskType, shape, color)
+                val isSwitchTrial = previousTaskType != null && previousTaskType != taskType
+                
+                trials.add(TrialSpec(taskType, shape, color, correctResponse, congruency, isSwitchTrial))
+                previousTaskType = taskType
+            }
+        }
+        
+        return trials
+    }
+    
+    private fun generateStimulusForCongruency(taskType: TaskType, shouldBeCongruent: Boolean): Pair<Shape, Color> {
+        val shapes = Shape.values()
+        val colors = Color.values()
+        
+        return if (shouldBeCongruent) {
+            // Generate congruent stimulus (both tasks give same response)
+            when (taskType) {
+                TaskType.COLOR -> {
+                    // Choose shape first, then color that matches
+                    val shape = shapes.random()
+                    val color = when (shape) {
+                        Shape.CIRCLE -> Color.YELLOW // Both would give LEFT
+                        Shape.RECTANGLE -> Color.BLUE // Both would give RIGHT
+                    }
+                    Pair(shape, color)
+                }
+                TaskType.SHAPE -> {
+                    // Choose color first, then shape that matches
+                    val color = colors.random()
+                    val shape = when (color) {
+                        Color.YELLOW -> Shape.CIRCLE // Both would give LEFT
+                        Color.BLUE -> Shape.RECTANGLE // Both would give RIGHT
+                    }
+                    Pair(shape, color)
+                }
+            }
+        } else {
+            // Generate incongruent stimulus (tasks give different responses)
+            when (taskType) {
+                TaskType.COLOR -> {
+                    // Choose shape first, then color that conflicts
+                    val shape = shapes.random()
+                    val color = when (shape) {
+                        Shape.CIRCLE -> Color.BLUE // Color says RIGHT, shape says LEFT
+                        Shape.RECTANGLE -> Color.YELLOW // Color says LEFT, shape says RIGHT
+                    }
+                    Pair(shape, color)
+                }
+                TaskType.SHAPE -> {
+                    // Choose color first, then shape that conflicts
+                    val color = colors.random()
+                    val shape = when (color) {
+                        Color.YELLOW -> Shape.RECTANGLE // Color says LEFT, shape says RIGHT
+                        Color.BLUE -> Shape.CIRCLE // Color says RIGHT, shape says LEFT
+                    }
+                    Pair(shape, color)
+                }
+            }
+        }
+    }
+    
+    private fun determineCongruency(taskType: TaskType, shape: Shape, color: Color): Congruency {
         // Congruent: both tasks would give the same response
         // Incongruent: tasks would give different responses
         val colorResponse = when (color) {
