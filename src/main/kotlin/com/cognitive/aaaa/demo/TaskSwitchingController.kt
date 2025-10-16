@@ -14,7 +14,7 @@ class TaskSwitchingController(
     
     @GetMapping("/")
     fun index(model: Model): String {
-        return "greeting"
+        return "test"
     }
     
     @PostMapping("/api/session")
