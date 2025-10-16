@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Switching Cognitive Test</title>
     <link rel="stylesheet" href="/css/task-switching.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <!-- Build-time configuration fallback -->
     <script>
@@ -15,44 +17,72 @@
 <body>
     <!-- Authentication Section -->
     <div id="auth" class="auth-container">
-        <div class="auth-form">
+        <div class="auth-card">
             <div class="auth-header">
+                <div class="app-logo">
+                    <span class="material-icons">psychology</span>
+                </div>
                 <h1>Task Switching Cognitive Test</h1>
-                <p>Please sign in to save your test results, or continue as a guest</p>
+                <p class="auth-subtitle">Sign in to participate in our cognitive research study and save your test results</p>
             </div>
             
             <div class="auth-tabs">
-                <button id="signInTab" class="tab-btn active">Sign In</button>
-                <button id="signUpTab" class="tab-btn">Sign Up</button>
+                <button id="signInTab" class="tab-btn active">
+                    <span class="material-icons">login</span>
+                    Sign In
+                </button>
+                <button id="signUpTab" class="tab-btn">
+                    <span class="material-icons">person_add</span>
+                    Sign Up
+                </button>
             </div>
             
             <div id="signInForm" class="auth-form-content">
                 <div class="form-group">
-                    <input type="email" id="signInEmail" placeholder="Email" required>
+                    <div class="input-container">
+                        <span class="material-icons input-icon">email</span>
+                        <input type="email" id="signInEmail" placeholder="Email address" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <input type="password" id="signInPassword" placeholder="Password" required>
+                    <div class="input-container">
+                        <span class="material-icons input-icon">lock</span>
+                        <input type="password" id="signInPassword" placeholder="Password" required>
+                    </div>
                 </div>
-                <button id="signInBtn" class="btn btn-primary">Sign In</button>
+                <button id="signInBtn" class="btn btn-primary">
+                    <span class="btn-text">Sign In</span>
+                    <span class="material-icons btn-icon">arrow_forward</span>
+                </button>
                 <div id="signInError" class="error-message"></div>
             </div>
             
             <div id="signUpForm" class="auth-form-content hidden">
                 <div class="form-group">
-                    <input type="email" id="signUpEmail" placeholder="Email" required>
+                    <div class="input-container">
+                        <span class="material-icons input-icon">email</span>
+                        <input type="email" id="signUpEmail" placeholder="Email address" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <input type="password" id="signUpPassword" placeholder="Password (min 6 characters)" required>
+                    <div class="input-container">
+                        <span class="material-icons input-icon">lock</span>
+                        <input type="password" id="signUpPassword" placeholder="Password (min 6 characters)" required>
+                    </div>
                 </div>
-                <button id="signUpBtn" class="btn btn-primary">Sign Up</button>
+                <button id="signUpBtn" class="btn btn-primary">
+                    <span class="btn-text">Create Account</span>
+                    <span class="material-icons btn-icon">arrow_forward</span>
+                </button>
                 <div id="signUpError" class="error-message"></div>
             </div>
             
-            <div class="auth-divider">
-                <span>or</span>
+            <div class="auth-footer">
+                <p class="privacy-note">
+                    <span class="material-icons">security</span>
+                    Your data is protected and will only be used for research purposes
+                </p>
             </div>
-            
-            <button id="continueAnonymousBtn" class="btn btn-secondary">Continue as Guest</button>
         </div>
     </div>
 
@@ -61,13 +91,19 @@
         <header class="app-header">
             <div class="user-info">
                 <span id="userEmail" class="user-email"></span>
-                <button id="signOutBtn" class="btn btn-sm btn-secondary hidden">Sign Out</button>
+                <button id="signOutBtn" class="btn btn-sm btn-secondary hidden">
+                    <span class="material-icons">logout</span>
+                    Sign Out
+                </button>
             </div>
             <div class="app-title">
                 <h1>Task Switching Cognitive Test</h1>
             </div>
             <div class="admin-link">
-                <a href="/admin" class="btn btn-sm btn-primary hidden" id="adminLink">Admin Panel</a>
+                <a href="/admin" class="btn btn-sm btn-primary hidden" id="adminLink">
+                    <span class="material-icons">admin_panel_settings</span>
+                    Admin Panel
+                </a>
             </div>
         </header>
 

@@ -37,7 +37,6 @@ class SupabaseAuth {
         // Authentication forms
         document.getElementById('signInBtn')?.addEventListener('click', () => this.signIn());
         document.getElementById('signUpBtn')?.addEventListener('click', () => this.signUp());
-        document.getElementById('continueAnonymousBtn')?.addEventListener('click', () => this.continueAsGuest());
         document.getElementById('signOutBtn')?.addEventListener('click', () => this.signOut());
         
         // Enter key support
@@ -156,11 +155,6 @@ class SupabaseAuth {
         }
     }
     
-    continueAsGuest() {
-        this.currentUser = null;
-        this.accessToken = null;
-        this.showMainApp();
-    }
     
     showAuthForm() {
         document.getElementById('auth').classList.remove('hidden');
