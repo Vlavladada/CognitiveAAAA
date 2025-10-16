@@ -3,6 +3,7 @@ package com.cognitive.aaaa.demo
 import com.cognitive.aaaa.demo.model.*
 import com.cognitive.aaaa.demo.service.TaskSwitchingService
 import com.cognitive.aaaa.demo.service.AuthenticationService
+import com.cognitive.aaaa.demo.service.SupabaseAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.*
 @Controller
 class TaskSwitchingController(
     private val taskSwitchingService: TaskSwitchingService,
-    private val authenticationService: AuthenticationService
+    private val authenticationService: AuthenticationService,
+    private val supabaseAuthService: SupabaseAuthService
 ) {
     
     @GetMapping("/")
@@ -34,8 +36,15 @@ class TaskSwitchingController(
     
     @PostMapping("/api/session")
     @ResponseBody
-    fun createSession(@RequestParam(required = false) participantId: String?): ResponseEntity<TestSession> {
-        val user = authenticationService.getCurrentUser()
+    fun createSession(
+        @RequestParam(required = false) participantId: String?,
+        @RequestHeader(value = "X-User-ID", required = false) userId: String?
+    ): ResponseEntity<TestSession> {
+        val user = if (userId != null) {
+            supabaseAuthService.getUserBySupabaseId(userId)
+        } else {
+            authenticationService.getCurrentUser()
+        }
         val session = taskSwitchingService.createSession(user, participantId)
         return ResponseEntity.ok(session)
     }

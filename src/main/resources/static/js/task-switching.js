@@ -29,12 +29,21 @@ class TaskSwitchingTest {
     
     async startTest() {
         try {
+            // Get current user ID from auth manager
+            const userId = window.authManager?.currentUser?.supabaseUserId;
+            
             // Create session
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            };
+            
+            if (userId) {
+                headers['X-User-ID'] = userId;
+            }
+            
             const response = await fetch('/api/session', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: headers,
                 body: ''
             });
             

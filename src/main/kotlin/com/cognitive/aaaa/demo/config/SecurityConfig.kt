@@ -35,6 +35,8 @@ class SecurityConfig {
             .authorizeHttpRequests { authz ->
                 authz
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/session/**").permitAll()
+                    .requestMatchers("/api/user/**").permitAll()
                     .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
