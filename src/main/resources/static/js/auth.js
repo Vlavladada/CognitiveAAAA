@@ -9,33 +9,11 @@ class SupabaseAuthManager {
     }
     
     async init() {
-        // Initialize Supabase client
-        this.supabase = window.supabase || {
-            auth: {
-                signUp: async (credentials) => {
-                    // Mock implementation - replace with actual Supabase client
-                    console.log('Mock signUp:', credentials);
-                    return { data: { user: { id: 'mock-user-id', email: credentials.email } }, error: null };
-                },
-                signInWithPassword: async (credentials) => {
-                    // Mock implementation - replace with actual Supabase client
-                    console.log('Mock signIn:', credentials);
-                    return { data: { user: { id: 'mock-user-id', email: credentials.email } }, error: null };
-                },
-                signOut: async () => {
-                    console.log('Mock signOut');
-                    return { error: null };
-                },
-                getSession: async () => {
-                    // Mock implementation - replace with actual Supabase client
-                    return { data: { session: null }, error: null };
-                },
-                onAuthStateChange: (callback) => {
-                    // Mock implementation - replace with actual Supabase client
-                    return { data: { subscription: { unsubscribe: () => {} } } };
-                }
-            }
-        };
+        // Initialize Supabase client with real project
+        this.supabase = supabase.createClient(
+            'https://ewseweiyrrrnpvhulriv.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3c2V3ZWl5cnJybnB2aHVscml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MTAxMTEsImV4cCI6MjA3NjE4NjExMX0.sB1C5ZtCbKBJytrmJBrB11Te8mOIN6719P0yi2XNt3I'
+        );
         
         await this.checkAuthStatus();
         this.initializeEventListeners();
@@ -133,7 +111,9 @@ class SupabaseAuthManager {
                     },
                     body: JSON.stringify({
                         accessToken: data.session?.access_token || 'mock-token',
-                        refreshToken: data.session?.refresh_token || 'mock-refresh-token'
+                        refreshToken: data.session?.refresh_token || 'mock-refresh-token',
+                        email: data.user.email,
+                        supabaseUserId: data.user.id
                     })
                 });
                 
@@ -187,7 +167,9 @@ class SupabaseAuthManager {
                     },
                     body: JSON.stringify({
                         accessToken: data.session?.access_token || 'mock-token',
-                        refreshToken: data.session?.refresh_token || 'mock-refresh-token'
+                        refreshToken: data.session?.refresh_token || 'mock-refresh-token',
+                        email: data.user.email,
+                        supabaseUserId: data.user.id
                     })
                 });
                 

@@ -4,7 +4,12 @@ import com.cognitive.aaaa.demo.service.SupabaseAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-data class SupabaseAuthRequest(val accessToken: String, val refreshToken: String)
+data class SupabaseAuthRequest(
+    val accessToken: String,
+    val refreshToken: String,
+    val email: String? = null,
+    val supabaseUserId: String? = null
+)
 data class AuthResponse(val success: Boolean, val message: String, val user: UserResponse? = null)
 data class UserResponse(val supabaseUserId: String, val email: String, val role: String)
 
@@ -15,19 +20,25 @@ class AuthenticationController(private val supabaseAuthService: SupabaseAuthServ
     @PostMapping("/supabase")
     fun authenticateWithSupabase(@RequestBody request: SupabaseAuthRequest): ResponseEntity<AuthResponse> {
         return try {
-            // For demo purposes, we'll create a mock user with the provided email
             // In a real implementation, you would verify the Supabase token here
-            val email = "user@example.com" // This should come from token verification
-            val supabaseUserId = supabaseAuthService.generateMockSupabaseUserId()
+            // For now, we'll extract user info from the token or use the provided data
+            val email = request.email ?: "user@example.com" // This should come from token verification
+            val supabaseUserId = request.supabaseUserId ?: supabaseAuthService.generateMockSupabaseUserId()
             
-            val user = supabaseAuthService.createUserFromSupabase(supabaseUserId, email)
-            val savedUser = supabaseAuthService.saveUser(user)
-            val updatedUser = supabaseAuthService.updateUserLastLogin(savedUser)
+            // Check if user already exists by email
+            val existingUser = supabaseAuthService.getUserByEmail(email)
+            val finalSupabaseUserId = if (existingUser != null) {
+                existingUser.supabaseUserId
+            } else {
+                supabaseUserId
+            }
+            
+            val user = supabaseAuthService.createUserFromSupabase(finalSupabaseUserId, email)
             
             ResponseEntity.ok(AuthResponse(
                 success = true,
                 message = "Authentication successful",
-                user = UserResponse(updatedUser.supabaseUserId, updatedUser.email, updatedUser.role.name)
+                user = UserResponse(user.supabaseUserId, user.email, user.role.name)
             ))
         } catch (e: Exception) {
             ResponseEntity.badRequest().body(AuthResponse(
