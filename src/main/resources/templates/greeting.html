@@ -1,10 +1,95 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Getting Started: Serving Web Content</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Task Switching Cognitive Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/task-switching.css}" />
 </head>
 <body>
-<p th:text="|Hello, ${name}!|" />
+    <div id="app">
+        <!-- Instructions Phase -->
+        <div id="instructions" class="phase">
+            <div class="container">
+                <h1>Task Switching Cognitive Test</h1>
+                <div class="instruction-section">
+                    <h2>Instructions</h2>
+                    <p>This test measures your cognitive flexibility and attention control.</p>
+                    
+                    <h3>Task Rules:</h3>
+                    <div class="task-rules">
+                        <div class="rule">
+                            <h4>Color Task:</h4>
+                            <p>Press <strong>B</strong> for <span class="color-yellow">YELLOW</span> objects</p>
+                            <p>Press <strong>N</strong> for <span class="color-blue">BLUE</span> objects</p>
+                        </div>
+                        <div class="rule">
+                            <h4>Shape Task:</h4>
+                            <p>Press <strong>B</strong> for <span class="shape-circle">CIRCLES</span></p>
+                            <p>Press <strong>N</strong> for <span class="shape-rectangle">RECTANGLES</span></p>
+                        </div>
+                    </div>
+                    
+                    <h3>Important:</h3>
+                    <ul>
+                        <li>You will see a cue before each trial indicating which task to perform</li>
+                        <li>Respond as quickly and accurately as possible</li>
+                        <li>You have 2 seconds to respond to each stimulus</li>
+                        <li>There will be a training phase followed by the actual test</li>
+                    </ul>
+                    
+                    <div class="participant-input">
+                        <label for="participantId">Participant ID (optional):</label>
+                        <input type="text" id="participantId" placeholder="Enter your ID">
+                    </div>
+                    
+                    <button id="startBtn" class="btn-primary">Start Test</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Phase -->
+        <div id="training" class="phase hidden">
+            <div class="container">
+                <h2>Training Phase</h2>
+                <p>Practice the tasks. You will complete 10 trials.</p>
+                <div id="trainingProgress" class="progress">
+                    <div class="progress-bar"></div>
+                    <span class="progress-text">Trial 0 of 10</span>
+                </div>
+                <div id="trainingTrial" class="trial-container">
+                    <!-- Trial content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Phase -->
+        <div id="test" class="phase hidden">
+            <div class="container">
+                <h2>Test Phase</h2>
+                <p>Now perform the actual test. You will complete 50 trials.</p>
+                <div id="testProgress" class="progress">
+                    <div class="progress-bar"></div>
+                    <span class="progress-text">Trial 0 of 50</span>
+                </div>
+                <div id="testTrial" class="trial-container">
+                    <!-- Trial content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Phase -->
+        <div id="results" class="phase hidden">
+            <div class="container">
+                <h2>Test Results</h2>
+                <div id="resultsContent">
+                    <!-- Results will be inserted here -->
+                </div>
+                <button id="restartBtn" class="btn-primary">Start New Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/task-switching.js}"></script>
 </body>
 </html>
