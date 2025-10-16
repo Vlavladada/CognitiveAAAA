@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results - Task Switching Cognitive Test</title>
+    <link rel="stylesheet" href="/css/task-switching.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .results-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #4facfe;
+        }
+        
+        .result-card h3 {
+            margin-top: 0;
+            color: #4facfe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .interpretation {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .interpretation h3 {
+            color: #4facfe;
+            margin-top: 0;
+        }
+        
+        .interpretation-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #4facfe;
+        }
+        
+        .interpretation-item h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .interpretation-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+        
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4facfe;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3d8bfe;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .performance-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .performance-excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .performance-good {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .performance-average {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .performance-poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <div class="results-header">
+            <h1><span class="material-icons">analytics</span> Test Results</h1>
+            <p>Session completed on <span th:text="${#temporals.format(session.endTime, 'MMM dd, yyyy HH:mm')}"></span></p>
+        </div>
+        
+        <div class="results-grid">
+            <!-- Overall Performance -->
+            <div class="result-card">
+                <h3><span class="material-icons">assessment</span> Overall Performance</h3>
+                <div class="metric">
+                    <span class="metric-label">Accuracy</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.accuracy, 1, 1)} + '%'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Average Response Time</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.averageResponseTime, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Total Trials</span>
+                    <span class="metric-value" th:text="${results.totalTrials}"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Correct Responses</span>
+                    <span class="metric-value" th:text="${results.correctTrials}"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Errors</span>
+                    <span class="metric-value" th:text="${results.errorCount}"></span>
+                </div>
+            </div>
+            
+            <!-- Task Switching Performance -->
+            <div class="result-card">
+                <h3><span class="material-icons">swap_horiz</span> Task Switching</h3>
+                <div class="metric">
+                    <span class="metric-label">Switch Cost</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.switchCost, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Switch Trials Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.switchAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Repeat Trials Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.repeatAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+            </div>
+            
+            <!-- Task Interference -->
+            <div class="result-card">
+                <h3><span class="material-icons">psychology</span> Task Interference</h3>
+                <div class="metric">
+                    <span class="metric-label">Interference Effect</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.taskInterference, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Congruent Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.congruentAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Incongruent Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.incongruentAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+            </div>
+            
+            <!-- Task-Specific Performance -->
+            <div class="result-card">
+                <h3><span class="material-icons">palette</span> Task-Specific Performance</h3>
+                <div class="metric">
+                    <span class="metric-label">Color Task Accuracy</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.colorTaskAccuracy, 1, 1)} + '%'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Color Task Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.colorTaskAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Shape Task Accuracy</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.shapeTaskAccuracy, 1, 1)} + '%'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Shape Task Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.shapeTaskAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interpretation -->
+        <div class="interpretation">
+            <h3><span class="material-icons">lightbulb</span> Performance Interpretation</h3>
+            
+            <div class="interpretation-item">
+                <h4>Overall Accuracy</h4>
+                <p th:if="${results.accuracy >= 90}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.accuracy >= 80 and results.accuracy < 90}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.accuracy >= 70 and results.accuracy < 80}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.accuracy < 70}" class="performance-indicator performance-poor">Needs Improvement</p>
+                <p>Your accuracy of <strong th:text="${#numbers.formatDecimal(results.accuracy, 1, 1)} + '%'"></strong> indicates 
+                <span th:if="${results.accuracy >= 90}">excellent attention and cognitive control.</span>
+                <span th:if="${results.accuracy >= 80 and results.accuracy < 90}">good cognitive performance with room for improvement.</span>
+                <span th:if="${results.accuracy >= 70 and results.accuracy < 80}">average cognitive performance that could benefit from practice.</span>
+                <span th:if="${results.accuracy < 70}">cognitive performance that may benefit from training and practice.</span></p>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Task Switching Ability</h4>
+                <p th:if="${results.switchCost <= 50}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.switchCost > 50 and results.switchCost <= 100}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.switchCost > 100 and results.switchCost <= 150}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.switchCost > 150}" class="performance-indicator performance-poor">Needs Improvement</p>
+                <p>A switch cost of <strong th:text="${#numbers.formatDecimal(results.switchCost, 1, 1)} + ' ms'"></strong> indicates 
+                <span th:if="${results.switchCost <= 50}">excellent cognitive flexibility and task-switching ability.</span>
+                <span th:if="${results.switchCost > 50 and results.switchCost <= 100}">good cognitive flexibility with minimal switching difficulty.</span>
+                <span th:if="${results.switchCost > 100 and results.switchCost <= 150}">moderate difficulty with task switching, which is normal.</span>
+                <span th:if="${results.switchCost > 150}">significant difficulty with task switching that may benefit from practice.</span></p>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Interference Control</h4>
+                <p th:if="${results.taskInterference <= 30}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.taskInterference > 30 and results.taskInterference <= 60}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.taskInterference > 60 and results.taskInterference <= 100}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.taskInterference > 100}" class="performance-indicator performance-poor">Needs Improvement</p>
+                <p>An interference effect of <strong th:text="${#numbers.formatDecimal(results.taskInterference, 1, 1)} + ' ms'"></strong> suggests 
+                <span th:if="${results.taskInterference <= 30}">excellent ability to ignore irrelevant information and maintain focus.</span>
+                <span th:if="${results.taskInterference > 30 and results.taskInterference <= 60}">good interference control with minimal distraction effects.</span>
+                <span th:if="${results.taskInterference > 60 and results.taskInterference <= 100}">moderate susceptibility to interference, which is typical.</span>
+                <span th:if="${results.taskInterference > 100}">significant difficulty ignoring irrelevant information, suggesting attention training may be beneficial.</span></p>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">
+                <span class="material-icons">home</span>
+                Back to Home
+            </a>
+            <a href="/" class="btn btn-secondary" th:if="${isAuthenticated}">
+                <span class="material-icons">history</span>
+                View All Results
+            </a>
+            <a href="/" class="btn btn-secondary" th:if="${!isAuthenticated}">
+                <span class="material-icons">person_add</span>
+                Sign Up to Save Results
+            </a>
+        </div>
+    </div>
+</body>
+</html>
