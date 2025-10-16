@@ -183,19 +183,30 @@ class TaskSwitchingTest {
             <div class="feedback" style="display: none;"></div>
         `;
         
-        this.trialStartTime = Date.now();
-        this.isWaitingForResponse = true;
-        
-        // Set timeout for response
-        setTimeout(() => {
-            if (this.isWaitingForResponse) {
-                this.handleTimeout(containerId);
-            }
-        }, 2000);
+        // Use requestAnimationFrame to ensure DOM is updated before starting timer
+        requestAnimationFrame(() => {
+            this.trialStartTime = Date.now();
+            this.isWaitingForResponse = true;
+            
+            console.log('Stimulus displayed, timer started at:', this.trialStartTime);
+            
+            // Set timeout for response
+            setTimeout(() => {
+                if (this.isWaitingForResponse) {
+                    console.log('Timeout triggered - no response received');
+                    this.handleTimeout(containerId);
+                }
+            }, 2000);
+        });
     }
     
     handleKeyPress(event) {
-        if (!this.isWaitingForResponse) return;
+        if (!this.isWaitingForResponse) {
+            console.log('Key press ignored - not waiting for response');
+            return;
+        }
+        
+        console.log('Key pressed:', event.key);
         
         let response = null;
         if (event.key.toLowerCase() === 'b') {
@@ -205,16 +216,25 @@ class TaskSwitchingTest {
         }
         
         if (response) {
+            console.log('Processing response:', response);
             this.handleResponse(response);
+        } else {
+            console.log('Invalid key pressed:', event.key);
         }
     }
     
     async handleResponse(response) {
-        if (!this.isWaitingForResponse) return;
+        if (!this.isWaitingForResponse) {
+            console.log('Response ignored - not waiting for response');
+            return;
+        }
         
         this.isWaitingForResponse = false;
         const responseTime = Date.now() - this.trialStartTime;
         const trial = this.trials[this.currentTrialIndex];
+        
+        console.log('Response received:', response, 'Response time:', responseTime, 'ms');
+        console.log('Expected response:', trial.correctResponse);
         
         // Show feedback
         const containerId = this.currentPhase === 'training' ? 'trainingTrial' : 'testTrial';
