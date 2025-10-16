@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Switching Cognitive Test</title>
+    <link rel="stylesheet" href="/css/task-switching.css">
+    
+    <!-- Build-time configuration fallback -->
+    <script>
+        window.SUPABASE_URL = /*[[${@environment.getProperty('supabase.url')}]]*/ 'YOUR_SUPABASE_URL';
+        window.SUPABASE_ANON_KEY = /*[[${@environment.getProperty('supabase.anon-key')}]]*/ 'YOUR_SUPABASE_ANON_KEY';
+    </script>
+</head>
+<body>
+    <!-- Authentication Section -->
+    <div id="auth" class="auth-container">
+        <div class="auth-form">
+            <div class="auth-header">
+                <h1>Task Switching Cognitive Test</h1>
+                <p>Please sign in to save your test results, or continue as a guest</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button id="signInTab" class="tab-btn active">Sign In</button>
+                <button id="signUpTab" class="tab-btn">Sign Up</button>
+            </div>
+            
+            <div id="signInForm" class="auth-form-content">
+                <div class="form-group">
+                    <input type="email" id="signInEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="signInPassword" placeholder="Password" required>
+                </div>
+                <button id="signInBtn" class="btn btn-primary">Sign In</button>
+                <div id="signInError" class="error-message"></div>
+            </div>
+            
+            <div id="signUpForm" class="auth-form-content hidden">
+                <div class="form-group">
+                    <input type="email" id="signUpEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="signUpPassword" placeholder="Password (min 6 characters)" required>
+                </div>
+                <button id="signUpBtn" class="btn btn-primary">Sign Up</button>
+                <div id="signUpError" class="error-message"></div>
+            </div>
+            
+            <div class="auth-divider">
+                <span>or</span>
+            </div>
+            
+            <button id="continueAnonymousBtn" class="btn btn-secondary">Continue as Guest</button>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app hidden">
+        <header class="app-header">
+            <div class="user-info">
+                <span id="userEmail" class="user-email"></span>
+                <button id="signOutBtn" class="btn btn-sm btn-secondary hidden">Sign Out</button>
+            </div>
+            <div class="app-title">
+                <h1>Task Switching Cognitive Test</h1>
+            </div>
+            <div class="admin-link">
+                <a href="/admin" class="btn btn-sm btn-primary hidden" id="adminLink">Admin Panel</a>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <!-- Test content will be loaded here -->
+            <div id="testContainer">
+                <div class="test-phase" id="instructionsPhase">
+                    <h2>Instructions</h2>
+                    <div class="instructions-content">
+                        <p>This is a cognitive test that measures your ability to switch between different tasks.</p>
+                        <p>You will see colored shapes and need to respond based on either the <strong>color</strong> or <strong>shape</strong> of the stimulus.</p>
+                        
+                        <h3>Task Rules:</h3>
+                        <ul>
+                            <li><strong>Color Task:</strong> Press LEFT for yellow, RIGHT for blue</li>
+                            <li><strong>Shape Task:</strong> Press LEFT for circle, RIGHT for rectangle</li>
+                        </ul>
+                        
+                        <p>A cue will appear before each stimulus to tell you which task to perform.</p>
+                        <p>Please respond as quickly and accurately as possible.</p>
+                    </div>
+                    <button id="startBtn" class="btn btn-primary">Start Test</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/task-switching.js"></script>
+</body>
+</html>

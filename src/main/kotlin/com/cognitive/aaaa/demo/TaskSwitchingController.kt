@@ -2,6 +2,7 @@ package com.cognitive.aaaa.demo
 
 import com.cognitive.aaaa.demo.model.*
 import com.cognitive.aaaa.demo.service.TaskSwitchingService
+import com.cognitive.aaaa.demo.service.AuthenticationService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -9,18 +10,33 @@ import org.springframework.web.bind.annotation.*
 
 @Controller
 class TaskSwitchingController(
-    private val taskSwitchingService: TaskSwitchingService
+    private val taskSwitchingService: TaskSwitchingService,
+    private val authenticationService: AuthenticationService
 ) {
     
     @GetMapping("/")
     fun index(model: Model): String {
-        return "test"
+        val user = authenticationService.getCurrentUser()
+        model.addAttribute("isAuthenticated", authenticationService.isAuthenticated())
+        model.addAttribute("user", user)
+        return "greeting"
+    }
+
+    @GetMapping("/admin")
+    fun adminDashboard(model: Model): String {
+        val user = authenticationService.getCurrentUser()
+        if (user?.role != UserRole.ADMIN && user?.role != UserRole.SUPER_ADMIN) {
+            return "redirect:/"
+        }
+        model.addAttribute("user", user)
+        return "admin"
     }
     
     @PostMapping("/api/session")
     @ResponseBody
     fun createSession(@RequestParam(required = false) participantId: String?): ResponseEntity<TestSession> {
-        val session = taskSwitchingService.createSession(participantId)
+        val user = authenticationService.getCurrentUser()
+        val session = taskSwitchingService.createSession(user, participantId)
         return ResponseEntity.ok(session)
     }
     
@@ -71,6 +87,18 @@ class TaskSwitchingController(
     fun getSession(@PathVariable sessionId: String): ResponseEntity<TestSession?> {
         val session = taskSwitchingService.getSession(sessionId)
         return ResponseEntity.ok(session)
+    }
+
+    @GetMapping("/api/user/sessions")
+    @ResponseBody
+    fun getUserSessions(): ResponseEntity<List<TestSession>> {
+        val user = authenticationService.getCurrentUser()
+        return if (user != null) {
+            val sessions = taskSwitchingService.getUserSessions(user.id)
+            ResponseEntity.ok(sessions)
+        } else {
+            ResponseEntity.ok(emptyList())
+        }
     }
 }
 

@@ -1,0 +1,410 @@
+// Task Switching Cognitive Test JavaScript
+
+class TaskSwitchingTest {
+    constructor() {
+        this.sessionId = null;
+        this.currentPhase = 'instructions';
+        this.currentTrialIndex = 0;
+        this.trials = [];
+        this.trialStartTime = null;
+        this.isWaitingForResponse = false;
+        
+        this.initializeEventListeners();
+    }
+    
+    initializeEventListeners() {
+        document.getElementById('startBtn').addEventListener('click', () => this.startTest());
+        document.getElementById('restartBtn').addEventListener('click', () => this.restartTest());
+        
+        // Keyboard event listeners
+        document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+        
+        // Prevent default behavior for space bar
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    async startTest() {
+        const participantId = document.getElementById('participantId').value.trim() || null;
+        
+        try {
+            // Create session
+            const response = await fetch('/api/session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `participantId=${encodeURIComponent(participantId || '')}`
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to create session');
+            }
+            
+            const session = await response.json();
+            this.sessionId = session.sessionId;
+            
+            // Start training phase
+            await this.startTraining();
+            
+        } catch (error) {
+            console.error('Error starting test:', error);
+            alert('Error starting test. Please try again.');
+        }
+    }
+    
+    async startTraining() {
+        try {
+            const response = await fetch(`/api/session/${this.sessionId}/training`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to start training');
+            }
+            
+            this.trials = await response.json();
+            this.currentTrialIndex = 0;
+            this.currentPhase = 'training';
+            
+            this.showPhase('training');
+            this.updateProgress('trainingProgress', 0, this.trials.length);
+            
+            // Start first trial after a short delay
+            setTimeout(() => this.runNextTrial(), 1000);
+            
+        } catch (error) {
+            console.error('Error starting training:', error);
+            alert('Error starting training. Please try again.');
+        }
+    }
+    
+    async startTestPhase() {
+        try {
+            const response = await fetch(`/api/session/${this.sessionId}/test`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to start test');
+            }
+            
+            this.trials = await response.json();
+            this.currentTrialIndex = 0;
+            this.currentPhase = 'test';
+            
+            this.showPhase('test');
+            this.updateProgress('testProgress', 0, this.trials.length);
+            
+            // Start first trial after a short delay
+            setTimeout(() => this.runNextTrial(), 1000);
+            
+        } catch (error) {
+            console.error('Error starting test:', error);
+            alert('Error starting test. Please try again.');
+        }
+    }
+    
+    async runNextTrial() {
+        if (this.currentTrialIndex >= this.trials.length) {
+            if (this.currentPhase === 'training') {
+                // Training complete, start actual test
+                await this.startTestPhase();
+            } else {
+                // Test complete, show results
+                await this.showResults();
+            }
+            return;
+        }
+        
+        const trial = this.trials[this.currentTrialIndex];
+        const containerId = this.currentPhase === 'training' ? 'trainingTrial' : 'testTrial';
+        const progressId = this.currentPhase === 'training' ? 'trainingProgress' : 'testProgress';
+        
+        this.updateProgress(progressId, this.currentTrialIndex, this.trials.length);
+        
+        // Show fixation point
+        this.showFixationPoint(containerId);
+        
+        setTimeout(() => {
+            // Show cue
+            this.showCue(containerId, trial.taskType);
+            
+            setTimeout(() => {
+                // Clear cue and show stimulus
+                this.clearContainer(containerId);
+                
+                setTimeout(() => {
+                    this.showStimulus(containerId, trial);
+                }, 750); // cue delay
+                
+            }, 350); // cue display time
+            
+        }, 650); // fixation + delay
+    }
+    
+    showFixationPoint(containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '<div class="fixation-point">+</div>';
+    }
+    
+    showCue(containerId, taskType) {
+        const container = document.getElementById(containerId);
+        const cueText = taskType === 'COLOR' ? 'COLOR' : 'SHAPE';
+        const cueClass = taskType === 'COLOR' ? 'color-cue' : 'shape-cue';
+        container.innerHTML = `<div class="cue ${cueClass}">${cueText}</div>`;
+    }
+    
+    showStimulus(containerId, trial) {
+        const container = document.getElementById(containerId);
+        const stimulus = trial.stimulus;
+        
+        // Create stimulus class name
+        const shapeClass = stimulus.shape.toLowerCase();
+        const colorClass = stimulus.color.toLowerCase();
+        const stimulusClass = `${shapeClass}-${colorClass}`;
+        
+        // Create stimulus symbol
+        const symbol = stimulus.shape === 'CIRCLE' ? '●' : '■';
+        
+        container.innerHTML = `
+            <div class="stimulus ${stimulusClass}">${symbol}</div>
+            <div class="feedback" style="display: none;"></div>
+        `;
+        
+        this.trialStartTime = Date.now();
+        this.isWaitingForResponse = true;
+        
+        // Set timeout for response
+        setTimeout(() => {
+            if (this.isWaitingForResponse) {
+                this.handleTimeout(containerId);
+            }
+        }, 2000);
+    }
+    
+    handleKeyPress(event) {
+        if (!this.isWaitingForResponse) return;
+        
+        let response = null;
+        if (event.key.toLowerCase() === 'b') {
+            response = 'LEFT';
+        } else if (event.key.toLowerCase() === 'n') {
+            response = 'RIGHT';
+        }
+        
+        if (response) {
+            this.handleResponse(response);
+        }
+    }
+    
+    async handleResponse(response) {
+        if (!this.isWaitingForResponse) return;
+        
+        this.isWaitingForResponse = false;
+        const responseTime = Date.now() - this.trialStartTime;
+        const trial = this.trials[this.currentTrialIndex];
+        
+        // Show feedback
+        const containerId = this.currentPhase === 'training' ? 'trainingTrial' : 'testTrial';
+        const feedbackElement = document.querySelector(`#${containerId} .feedback`);
+        
+        const isCorrect = response === trial.stimulus.correctResponse;
+        feedbackElement.textContent = isCorrect ? 'Correct!' : 'Incorrect';
+        feedbackElement.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+        feedbackElement.style.display = 'block';
+        
+        // Record response
+        try {
+            await fetch(`/api/session/${this.sessionId}/response`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    response: response,
+                    responseTime: responseTime
+                })
+            });
+        } catch (error) {
+            console.error('Error recording response:', error);
+        }
+        
+        // Move to next trial after delay
+        setTimeout(() => {
+            this.currentTrialIndex++;
+            this.runNextTrial();
+        }, 1000);
+    }
+    
+    handleTimeout(containerId) {
+        if (!this.isWaitingForResponse) return;
+        
+        this.isWaitingForResponse = false;
+        const feedbackElement = document.querySelector(`#${containerId} .feedback`);
+        feedbackElement.textContent = 'Too slow!';
+        feedbackElement.className = 'feedback timeout';
+        feedbackElement.style.display = 'block';
+        
+        // Record timeout
+        fetch(`/api/session/${this.sessionId}/response`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                response: null,
+                responseTime: 2000
+            })
+        }).catch(error => console.error('Error recording timeout:', error));
+        
+        // Move to next trial after delay
+        setTimeout(() => {
+            this.currentTrialIndex++;
+            this.runNextTrial();
+        }, 1000);
+    }
+    
+    async showResults() {
+        try {
+            const response = await fetch(`/api/session/${this.sessionId}/complete`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to get results');
+            }
+            
+            const results = await response.json();
+            this.displayResults(results);
+            this.showPhase('results');
+            
+        } catch (error) {
+            console.error('Error getting results:', error);
+            alert('Error getting results. Please try again.');
+        }
+    }
+    
+    displayResults(results) {
+        const resultsContent = document.getElementById('resultsContent');
+        
+        resultsContent.innerHTML = `
+            <div class="results-content">
+                <h3>Your Performance</h3>
+                
+                <div class="results-metric">
+                    <span class="label">Total Trials:</span>
+                    <span class="value">${results.totalTrials}</span>
+                </div>
+                
+                <div class="results-metric">
+                    <span class="label">Correct Responses:</span>
+                    <span class="value">${results.correctTrials} (${(results.accuracy * 100).toFixed(1)}%)</span>
+                </div>
+                
+                <div class="results-metric">
+                    <span class="label">Average Response Time:</span>
+                    <span class="value">${results.averageRT.toFixed(0)} ms</span>
+                </div>
+                
+                <div class="results-metric">
+                    <span class="label">Task-Repeat Trials RT:</span>
+                    <span class="value">${results.repeatTrialsRT.toFixed(0)} ms</span>
+                </div>
+                
+                <div class="results-metric">
+                    <span class="label">Task-Switch Trials RT:</span>
+                    <span class="value">${results.switchTrialsRT.toFixed(0)} ms</span>
+                </div>
+                
+                <div class="results-metric highlight">
+                    <span class="label">Task-Switch Cost:</span>
+                    <span class="value">${results.switchCost.toFixed(0)} ms</span>
+                </div>
+                
+                <div class="results-metric">
+                    <span class="label">Congruent Trials RT:</span>
+                    <span class="value">${results.congruentTrialsRT.toFixed(0)} ms</span>
+                </div>
+                
+                <div class="results-metric">
+                    <span class="label">Incongruent Trials RT:</span>
+                    <span class="value">${results.incongruentTrialsRT.toFixed(0)} ms</span>
+                </div>
+                
+                <div class="results-metric highlight">
+                    <span class="label">Task Interference:</span>
+                    <span class="value">${results.taskInterference.toFixed(0)} ms</span>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h4>Interpretation:</h4>
+                    <p><strong>Task-Switch Cost:</strong> The difference in response time between task-switch and task-repeat trials. Higher values indicate more difficulty switching between tasks.</p>
+                    <p><strong>Task Interference:</strong> The difference in response time between incongruent and congruent trials. Higher values indicate more interference from irrelevant stimulus features.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    showPhase(phaseName) {
+        // Hide all phases
+        document.querySelectorAll('.phase').forEach(phase => {
+            phase.classList.add('hidden');
+        });
+        
+        // Show target phase
+        document.getElementById(phaseName).classList.remove('hidden');
+    }
+    
+    updateProgress(progressId, current, total) {
+        const progressBar = document.querySelector(`#${progressId} .progress-bar::after`);
+        const progressText = document.querySelector(`#${progressId} .progress-text`);
+        
+        const percentage = (current / total) * 100;
+        document.querySelector(`#${progressId} .progress-bar`).style.setProperty('--progress', `${percentage}%`);
+        
+        if (progressText) {
+            progressText.textContent = `Trial ${current} of ${total}`;
+        }
+        
+        // Update progress bar width
+        const progressBarElement = document.querySelector(`#${progressId} .progress-bar`);
+        progressBarElement.style.setProperty('--progress-width', `${percentage}%`);
+    }
+    
+    clearContainer(containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+    }
+    
+    restartTest() {
+        this.sessionId = null;
+        this.currentPhase = 'instructions';
+        this.currentTrialIndex = 0;
+        this.trials = [];
+        this.trialStartTime = null;
+        this.isWaitingForResponse = false;
+        
+        // Clear participant ID
+        document.getElementById('participantId').value = '';
+        
+        this.showPhase('instructions');
+    }
+}
+
+// Initialize the test when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new TaskSwitchingTest();
+});
+
+// Update CSS for progress bar
+const style = document.createElement('style');
+style.textContent = `
+    .progress-bar::after {
+        width: var(--progress-width, 0%) !important;
+    }
+`;
+document.head.appendChild(style);
