@@ -23,7 +23,6 @@ class SupabaseAuthService(
         val existingUser = userRepository.findBySupabaseUserId(supabaseUserId).orElse(null)
         
         return if (existingUser != null) {
-            // Update existing user and save to database
             val updatedUser = existingUser.copy(
                 email = email,
                 lastLogin = LocalDateTime.now(),
@@ -31,7 +30,6 @@ class SupabaseAuthService(
             )
             userRepository.save(updatedUser)
         } else {
-            // Create new user and save to database
             val newUser = User(
                 supabaseUserId = supabaseUserId,
                 email = email,

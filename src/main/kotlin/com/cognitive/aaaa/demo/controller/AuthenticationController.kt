@@ -1,4 +1,4 @@
-package com.cognitive.aaaa.demo
+package com.cognitive.aaaa.demo.controller
 
 import com.cognitive.aaaa.demo.service.SupabaseAuthService
 import org.springframework.http.ResponseEntity

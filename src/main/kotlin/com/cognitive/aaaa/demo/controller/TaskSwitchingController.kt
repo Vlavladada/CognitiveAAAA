@@ -1,4 +1,4 @@
-package com.cognitive.aaaa.demo
+package com.cognitive.aaaa.demo.controller
 
 import com.cognitive.aaaa.demo.model.*
 import com.cognitive.aaaa.demo.service.TaskSwitchingService
@@ -22,16 +22,6 @@ class TaskSwitchingController(
         model.addAttribute("isAuthenticated", authenticationService.isAuthenticated())
         model.addAttribute("user", user)
         return "greeting"
-    }
-
-    @GetMapping("/admin")
-    fun adminDashboard(model: Model): String {
-        val user = authenticationService.getCurrentUser()
-        if (user?.role != UserRole.ADMIN && user?.role != UserRole.SUPER_ADMIN) {
-            return "redirect:/"
-        }
-        model.addAttribute("user", user)
-        return "admin"
     }
     
     @PostMapping("/api/session")
