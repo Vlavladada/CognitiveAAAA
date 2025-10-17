@@ -45,7 +45,7 @@ data class Trial(
     
     val userResponse: Response? = null,
     
-    val responseTimeMs: Long? = null, // in milliseconds
+    val responseTimeMs: Long? = null,
     
     val isCorrect: Boolean? = null,
     
@@ -54,7 +54,7 @@ data class Trial(
     
     val responseTime: LocalDateTime? = null,
     
-    val isSwitchTrial: Boolean = false, // true if task type differs from previous trial
+    val isSwitchTrial: Boolean = false,
 ) {
     constructor() : this(
         id = 0,

@@ -277,45 +277,39 @@ class TaskSwitchingService(
         val colors = Color.values()
         
         return if (shouldBeCongruent) {
-            // Generate congruent stimulus (both tasks give same response)
             when (taskType) {
                 TaskType.COLOR -> {
-                    // Choose shape first, then color that matches
                     val shape = shapes.random()
                     val color = when (shape) {
-                        Shape.CIRCLE -> Color.YELLOW // Both would give LEFT
-                        Shape.RECTANGLE -> Color.BLUE // Both would give RIGHT
+                        Shape.CIRCLE -> Color.YELLOW
+                        Shape.RECTANGLE -> Color.BLUE
                     }
                     Pair(shape, color)
                 }
                 TaskType.SHAPE -> {
-                    // Choose color first, then shape that matches
                     val color = colors.random()
                     val shape = when (color) {
-                        Color.YELLOW -> Shape.CIRCLE // Both would give LEFT
-                        Color.BLUE -> Shape.RECTANGLE // Both would give RIGHT
+                        Color.YELLOW -> Shape.CIRCLE
+                        Color.BLUE -> Shape.RECTANGLE
                     }
                     Pair(shape, color)
                 }
             }
         } else {
-            // Generate incongruent stimulus (tasks give different responses)
             when (taskType) {
                 TaskType.COLOR -> {
-                    // Choose shape first, then color that conflicts
                     val shape = shapes.random()
                     val color = when (shape) {
-                        Shape.CIRCLE -> Color.BLUE // Color says RIGHT, shape says LEFT
-                        Shape.RECTANGLE -> Color.YELLOW // Color says LEFT, shape says RIGHT
+                        Shape.CIRCLE -> Color.BLUE
+                        Shape.RECTANGLE -> Color.YELLOW
                     }
                     Pair(shape, color)
                 }
                 TaskType.SHAPE -> {
-                    // Choose color first, then shape that conflicts
                     val color = colors.random()
                     val shape = when (color) {
-                        Color.YELLOW -> Shape.RECTANGLE // Color says LEFT, shape says RIGHT
-                        Color.BLUE -> Shape.CIRCLE // Color says RIGHT, shape says LEFT
+                        Color.YELLOW -> Shape.RECTANGLE
+                        Color.BLUE -> Shape.CIRCLE
                     }
                     Pair(shape, color)
                 }
@@ -324,8 +318,6 @@ class TaskSwitchingService(
     }
     
     private fun determineCongruency(taskType: TaskType, shape: Shape, color: Color): Congruency {
-        // Congruent: both tasks would give the same response
-        // Incongruent: tasks would give different responses
         val colorResponse = when (color) {
             Color.BLUE -> Response.RIGHT
             Color.YELLOW -> Response.LEFT
@@ -345,8 +337,7 @@ class TaskSwitchingService(
         val averageResponseTime = if (correctTrials.isNotEmpty()) {
             correctTrials.mapNotNull { it.responseTimeMs }.average()
         } else 0.0
-        
-        // Calculate switch cost (difference between switch and repeat trials)
+
         val switchTrials = trials.filter { it.isSwitchTrial && it.isCorrect == true }
         val repeatTrials = trials.filter { !it.isSwitchTrial && it.isCorrect == true }
         
@@ -359,8 +350,7 @@ class TaskSwitchingService(
         } else 0.0
         
         val switchCost = switchAvgRT - repeatAvgRT
-        
-        // Calculate task interference (difference between incongruent and congruent trials)
+
         val congruentTrials = trials.filter { it.congruency == Congruency.CONGRUENT && it.isCorrect == true }
         val incongruentTrials = trials.filter { it.congruency == Congruency.INCONGRUENT && it.isCorrect == true }
         
@@ -373,8 +363,7 @@ class TaskSwitchingService(
         } else 0.0
         
         val taskInterference = incongruentAvgRT - congruentAvgRT
-        
-        // Calculate task-specific metrics
+
         val colorTrials = trials.filter { it.taskType == TaskType.COLOR && it.isCorrect == true }
         val shapeTrials = trials.filter { it.taskType == TaskType.SHAPE && it.isCorrect == true }
         
