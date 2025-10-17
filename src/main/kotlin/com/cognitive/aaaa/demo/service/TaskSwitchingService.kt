@@ -75,13 +75,13 @@ class TaskSwitchingService(
         return trials.find { it.status == TrialStatus.PENDING }
     }
     
-    fun recordResponse(sessionId: String, response: Response, responseTime: Long): Trial? {
+    fun recordResponse(sessionId: String, response: Response?, responseTime: Long): Trial? {
         val session = testSessionRepository.findBySessionId(sessionId)
             .orElseThrow { IllegalArgumentException("Session not found") }
         
         val currentTrial = getCurrentTrial(sessionId) ?: return null
         
-        val isCorrect = response == currentTrial.correctResponse
+        val isCorrect = response?.let { it == currentTrial.correctResponse } ?: false
         val updatedTrial = currentTrial.copy(
             userResponse = response,
             responseTimeMs = responseTime,

@@ -9,15 +9,29 @@ class TaskSwitchingTest {
         this.trialStartTime = null;
         this.isWaitingForResponse = false;
         
+        // Initialize event listeners immediately - DOM should be ready
         this.initializeEventListeners();
     }
     
     initializeEventListeners() {
-        document.getElementById('startBtn').addEventListener('click', () => this.startTest());
-        document.getElementById('restartBtn').addEventListener('click', () => this.restartTest());
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
         
-        // Keyboard event listeners
-        document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+        if (!startBtn) {
+            console.error('startBtn element not found! Retrying in 100ms...');
+            setTimeout(() => this.initializeEventListeners(), 100);
+            return;
+        }
+        
+        // startBtn is required, restartBtn is optional (only exists on results page)
+        startBtn.addEventListener('click', () => this.startTest());
+        
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => this.restartTest());
+        }
+        
+        // Keyboard event listeners - use capture to ensure we get the events
+        document.addEventListener('keydown', (e) => this.handleKeyPress(e), true);
         
         // Prevent default behavior for space bar
         document.addEventListener('keydown', (e) => {
@@ -25,9 +39,17 @@ class TaskSwitchingTest {
                 e.preventDefault();
             }
         });
+        
+        console.log('Event listeners initialized successfully');
+        
+        // Global keydown listener for debugging
+        document.addEventListener('keydown', (e) => {
+            console.log('Global keydown event:', e.key, 'code:', e.code);
+        });
     }
     
     async startTest() {
+        console.log('startTest() called');
         try {
             // Get current user ID from auth manager
             const userId = window.authManager?.currentUser?.supabaseUserId;

@@ -112,6 +112,6 @@ class TaskSwitchingController(
 }
 
 data class ResponseRequest(
-    val response: Response,
+    val response: Response?,
     val responseTime: Long
 )
