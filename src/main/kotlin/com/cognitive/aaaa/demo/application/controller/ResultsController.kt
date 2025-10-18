@@ -55,7 +55,7 @@ class ResultsController(
 
     @GetMapping("/api/user/results")
     @ResponseBody
-    fun getUserResults(): ResponseEntity<List<TestResults>> {
+    fun getUserResults(): ResponseEntity<List<Map<String, Any?>>> {
         val user = authenticationService.getCurrentUser()
         if (user == null) {
             return ResponseEntity.ok(emptyList())
@@ -63,7 +63,28 @@ class ResultsController(
 
         val sessions = testSessionRepository.findByUserIdAndIsCompletedTrueOrderByStartTimeDesc(user.id)
         val results = sessions.mapNotNull { session ->
-            testResultsRepository.findBySessionId(session.id!!).orElse(null)
+            testResultsRepository.findBySessionId(session.id!!).orElse(null)?.let { result ->
+                mapOf(
+                    "id" to result.id,
+                    "session" to mapOf("sessionId" to session.id),
+                    "totalTrials" to result.totalTrials,
+                    "correctTrials" to result.correctTrials,
+                    "accuracy" to result.accuracy,
+                    "averageResponseTime" to result.averageResponseTime,
+                    "switchCost" to result.switchCost,
+                    "taskInterference" to result.taskInterference,
+                    "errorCount" to result.errorCount,
+                    "colorTaskAccuracy" to result.colorTaskAccuracy,
+                    "shapeTaskAccuracy" to result.shapeTaskAccuracy,
+                    "colorTaskAvgRt" to result.colorTaskAvgRt,
+                    "shapeTaskAvgRt" to result.shapeTaskAvgRt,
+                    "congruentAvgRt" to result.congruentAvgRt,
+                    "incongruentAvgRt" to result.incongruentAvgRt,
+                    "switchAvgRt" to result.switchAvgRt,
+                    "repeatAvgRt" to result.repeatAvgRt,
+                    "createdAt" to result.createdAt
+                )
+            }
         }
 
         return ResponseEntity.ok(results)
