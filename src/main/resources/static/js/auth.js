@@ -14,17 +14,31 @@ class SupabaseAuthManager {
         
         await this.checkAuthStatus();
         this.initializeEventListeners();
+        
+        // Update UI based on authentication status
+        this.updateUIForAuthStatus();
     }
     
     async checkAuthStatus() {
         try {
-            const response = await fetch('/api/auth/me');
-            if (response.ok) {
-                const user = await response.json();
-                if (user) {
-                    this.currentUser = user;
-                    this.isAuthenticated = true;
-                    this.showMainApp();
+            // Get current Supabase session
+            const { data: { session } } = await this.supabase.auth.getSession();
+            
+            if (session?.user) {
+                const response = await fetch('/api/auth/me', {
+                    headers: {
+                        'X-User-ID': session.user.id
+                    }
+                });
+                if (response.ok) {
+                    const user = await response.json();
+                    if (user) {
+                        this.currentUser = user;
+                        this.isAuthenticated = true;
+                        this.showMainApp();
+                    } else {
+                        this.showAuthForm();
+                    }
                 } else {
                     this.showAuthForm();
                 }
@@ -261,7 +275,17 @@ class SupabaseAuthManager {
     
     async showHistory() {
         try {
-            const response = await fetch('/api/user/results');
+            // Get current Supabase session
+            const { data: { session } } = await this.supabase.auth.getSession();
+            
+            const headers = {};
+            if (session?.user) {
+                headers['X-User-ID'] = session.user.id;
+            }
+            
+            const response = await fetch('/api/user/results', {
+                headers: headers
+            });
             const results = await response.json();
             
             const historyContent = document.getElementById('historyContent');
@@ -325,6 +349,27 @@ class SupabaseAuthManager {
                 historyContent.innerHTML = '<div class="error">Error loading your test history. Please try again.</div>';
             }
         }
+    }
+    
+    updateUIForAuthStatus() {
+        // Update authentication-dependent UI elements
+        const authElements = document.querySelectorAll('[data-auth-required]');
+        authElements.forEach(element => {
+            if (this.isAuthenticated) {
+                element.classList.remove('hidden');
+            } else {
+                element.classList.add('hidden');
+            }
+        });
+        
+        const unauthElements = document.querySelectorAll('[data-auth-hidden]');
+        unauthElements.forEach(element => {
+            if (this.isAuthenticated) {
+                element.classList.add('hidden');
+            } else {
+                element.classList.remove('hidden');
+            }
+        });
     }
     
     showInstructions() {

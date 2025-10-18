@@ -15,7 +15,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(
+    private val supabaseAuthenticationFilter: SupabaseAuthenticationFilter
+) {
     
     @Bean
     fun passwordEncoder(): PasswordEncoder {
@@ -32,6 +34,7 @@ class SecurityConfig {
         http
             .cors { it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
+            .addFilterBefore(supabaseAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter::class.java)
             .authorizeHttpRequests { authz ->
                 authz
                     .requestMatchers("/api/auth/**").permitAll()

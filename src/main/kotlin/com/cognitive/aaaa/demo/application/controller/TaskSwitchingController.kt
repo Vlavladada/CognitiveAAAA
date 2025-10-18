@@ -22,9 +22,10 @@ class TaskSwitchingController(
     
     @GetMapping("/")
     fun index(model: Model): String {
-        val user = authenticationService.getCurrentUser()
-        model.addAttribute("isAuthenticated", authenticationService.isAuthenticated())
-        model.addAttribute("user", user)
+        // For web page requests, we can't get user from headers
+        // The frontend will handle authentication via JavaScript
+        model.addAttribute("isAuthenticated", false)
+        model.addAttribute("user", null)
         return "greeting"
     }
     

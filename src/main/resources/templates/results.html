@@ -369,15 +369,19 @@
                 <span class="material-icons">home</span>
                 Back to Home
             </a>
-            <a href="/" class="btn btn-secondary" th:if="${isAuthenticated}">
+            <a href="/" class="btn btn-secondary" data-auth-required>
                 <span class="material-icons">history</span>
                 View All Results
             </a>
-            <a href="/" class="btn btn-secondary" th:if="${!isAuthenticated}">
+            <a href="/" class="btn btn-secondary" data-auth-hidden>
                 <span class="material-icons">person_add</span>
                 Sign Up to Save Results
             </a>
         </div>
     </div>
+    
+    <!-- Supabase JavaScript Library -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>

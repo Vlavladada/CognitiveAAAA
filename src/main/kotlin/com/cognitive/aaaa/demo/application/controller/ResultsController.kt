@@ -33,8 +33,10 @@ class ResultsController(
 
         model.addAttribute("session", session)
         model.addAttribute("results", results)
-        model.addAttribute("isAuthenticated", authenticationService.isAuthenticated())
-        model.addAttribute("currentUser", authenticationService.getCurrentUser())
+        // For web page requests, we can't get user from headers
+        // The frontend will handle authentication via JavaScript
+        model.addAttribute("isAuthenticated", false)
+        model.addAttribute("currentUser", null)
 
         return "results"
     }
