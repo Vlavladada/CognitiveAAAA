@@ -29,7 +29,7 @@ class TaskSwitchingController(
     }
     
     @PostMapping("/api/session")
-//    @ResponseBody
+    @ResponseBody
     fun createSession(
         @RequestHeader(value = "X-User-ID", required = false) userId: String?
     ): ResponseEntity<TestSession> {

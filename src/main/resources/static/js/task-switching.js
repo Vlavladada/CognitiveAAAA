@@ -41,12 +41,6 @@ class TaskSwitchingTest {
         });
     }
 
-    ensureUuid(id) {
-        if (typeof id !== 'string') return null;
-        const s = id.trim().replace(/[{}]/g, '').toLowerCase();
-        return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(s) ? s : null;
-    }
-
     async readJsonOrText(resp) {
         const ct = resp.headers.get('content-type') || '';
         if (ct.includes('application/json')) return { kind: 'json', body: await resp.json() };
@@ -79,17 +73,19 @@ class TaskSwitchingTest {
             }
             
             console.log('Session created:', response);
-            const parsed = await readJsonOrText(response);
+            const parsed = await this.readJsonOrText(response);
             if (parsed.kind !== 'json') {
                 console.error('Non-JSON session response:', parsed.body);
                 alert('Server returned non-JSON for /api/session');
                 return;
             }
 
-            const session = parsed.body;        // <- actual JSON
+            const session = parsed.body;
             console.log('Create session payload:', session);
+            console.log('Session ID from payload:', session?.id);
+            console.log('Session ID type:', typeof session?.id);
 
-            const normalized = ensureUuid(session?.id); // server returns { id: "<uuid>" }
+            const normalized = session?.id;
             if (!normalized) {
                 console.error('Invalid session id from server:', session?.id);
                 alert('Server returned an invalid session id.');
@@ -97,10 +93,10 @@ class TaskSwitchingTest {
             }
 
             this.sessionId = normalized;
-            
-            // Start training phase
+            console.log('SessionId set to:', this.sessionId);
+            console.log('SessionId type after setting:', typeof this.sessionId);
+
             await this.startTraining();
-            
         } catch (error) {
             console.error('Error starting test:', error);
             alert('Error starting test. Please try again.');
@@ -109,6 +105,8 @@ class TaskSwitchingTest {
     
     async startTraining() {
         try {
+            console.log('Starting training with sessionId:', this.sessionId);
+            console.log('SessionId type:', typeof this.sessionId);
             const response = await fetch(`/api/session/${this.sessionId}/training`, {
                 method: 'POST'
             });
