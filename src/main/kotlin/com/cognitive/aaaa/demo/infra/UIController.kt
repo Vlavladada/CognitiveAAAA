@@ -17,11 +17,4 @@ class UIController(
     fun index(model: Model): String {
         return "greeting"
     }
-
-    @PostMapping
-    fun createUser(@RequestBody user: User): String {
-        userRepository.save(user)
-        return "greeting"
-    }
-
 }

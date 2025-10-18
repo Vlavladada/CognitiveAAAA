@@ -1,4 +1,4 @@
-package com.cognitive.aaaa.demo.config
+package com.cognitive.aaaa.demo.infra.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

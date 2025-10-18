@@ -1,4 +1,4 @@
-package com.cognitive.aaaa.demo.service
+package com.cognitive.aaaa.demo.infra.service
 
 import com.cognitive.aaaa.demo.domain.model.User
 import com.cognitive.aaaa.demo.domain.model.UserRole

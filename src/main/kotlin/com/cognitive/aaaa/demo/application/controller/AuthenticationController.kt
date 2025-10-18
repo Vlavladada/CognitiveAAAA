@@ -1,6 +1,6 @@
-package com.cognitive.aaaa.demo.controller
+package com.cognitive.aaaa.demo.application.controller
 
-import com.cognitive.aaaa.demo.service.SupabaseAuthService
+import com.cognitive.aaaa.demo.infra.service.SupabaseAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
