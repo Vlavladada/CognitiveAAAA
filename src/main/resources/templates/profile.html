@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle}">MenopauseCare - Personal Health Dashboard</title>
+
+  <!-- Material Design CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+  <!-- Supabase JavaScript Library -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --primary-dark: #5a6fd8;
+      --secondary-color: #764ba2;
+      --accent-color: #f093fb;
+      --success-color: #4caf50;
+      --warning-color: #ff9800;
+      --error-color: #f44336;
+      --text-primary: #212121;
+      --text-secondary: #757575;
+      --background: #fafafa;
+      --surface: #ffffff;
+      --border: #e0e0e0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--background);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* Authentication Styles */
+    .auth-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .auth-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .auth-header h1 {
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: white;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .auth-form-content {
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-secondary);
+      z-index: 1;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 12px 12px 44px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 14px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Main App Styles */
+    .main-app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-title h1 {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-email {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    /* Navigation */
+    .nav-container {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0;
+    }
+
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      border: none;
+      background: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-tab.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .nav-tab:hover {
+      color: var(--primary-color);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .card-icon.cognitive {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card-icon.blood {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .card-icon.device {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .stat-value.positive {
+      color: var(--success-color);
+    }
+
+    .stat-value.warning {
+      color: var(--warning-color);
+    }
+
+    .stat-value.error {
+      color: var(--error-color);
+    }
+
+    /* Recent Items */
+    .recent-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .recent-item:last-child {
+      border-bottom: none;
+    }
+
+    .recent-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+    }
+
+    .recent-content {
+      flex: 1;
+    }
+
+    .recent-title {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .recent-date {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .recent-status {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-excellent {
+      background: #e8f5e8;
+      color: var(--success-color);
+    }
+
+    .status-good {
+      background: #fff3e0;
+      color: var(--warning-color);
+    }
+
+    .status-needs-attention {
+      background: #ffebee;
+      color: var(--error-color);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-outline:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      /* Auth Screen Mobile Styles */
+      .auth-container {
+        padding: 1rem;
+      }
+
+      .auth-card {
+        width: 95%;
+        max-width: 350px;
+        padding: 1.5rem;
+        margin: 0.5rem;
+      }
+
+      .auth-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .auth-header p {
+        font-size: 14px;
+      }
+
+      .tab-btn {
+        padding: 10px 8px;
+        font-size: 14px;
+      }
+
+      .tab-btn .material-icons {
+        font-size: 18px;
+      }
+
+      .form-control {
+        padding: 10px 10px 10px 40px;
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+
+      .input-icon {
+        left: 10px;
+      }
+
+      .btn {
+        padding: 12px;
+        font-size: 16px;
+      }
+
+      .privacy-note {
+        font-size: 12px;
+        text-align: center;
+      }
+
+      /* Main App Mobile Styles */
+      .app-header {
+        padding: 1rem;
+      }
+
+      .main-content {
+        padding: 1rem;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .nav-container {
+        padding: 0 1rem;
+      }
+
+      .nav-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .nav-tab {
+        white-space: nowrap;
+        padding: 1rem;
+      }
+    }
+
+    /* Extra Small Mobile Devices */
+    @media (max-width: 480px) {
+      .auth-card {
+        width: 98%;
+        max-width: 320px;
+        padding: 1rem;
+      }
+
+      .auth-header h1 {
+        font-size: 1.3rem;
+      }
+
+      .tab-btn {
+        padding: 8px 6px;
+        font-size: 13px;
+      }
+
+      .form-control {
+        padding: 8px 8px 8px 36px;
+      }
+
+      .btn {
+        padding: 10px;
+        font-size: 15px;
+      }
+    }
+
+    /* Loading States */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top: 2px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<!-- Main Application -->
+<div id="mainApp" class="main-app">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-title">
+      <h1>MenopauseCare</h1>
+    </div>
+    <div class="user-info">
+      <span id="userEmail" class="user-email"></span>
+      <button id="signOutBtn" class="btn-secondary">
+        <span class="material-icons">logout</span>
+        Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="nav-container">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="dashboard">
+        <span class="material-icons">dashboard</span>
+        Dashboard
+      </button>
+      <button class="nav-tab" data-tab="cognitive">
+        <span class="material-icons">psychology</span>
+        Cognitive Tests
+      </button>
+      <button class="nav-tab" data-tab="blood">
+        <span class="material-icons">science</span>
+        Blood Results
+      </button>
+      <button class="nav-tab" data-tab="devices">
+        <span class="material-icons">fitness_center</span>
+        Device Data
+      </button>
+      <button class="nav-tab" data-tab="research">
+        <span class="material-icons">share</span>
+        Research Sharing
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Dashboard Tab -->
+    <div id="dashboardTab" class="tab-content">
+      <div class="dashboard-grid">
+        <!-- Cognitive Tests Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon cognitive">
+              <span class="material-icons">psychology</span>
+            </div>
+            <h3 class="card-title">Cognitive Health</h3>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Tests Completed</span>
+            <span class="stat-value" th:text="${dashboardData.cognitiveTestStats.totalTestsCompleted}">12</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">This Month</span>
+            <span class="stat-value positive" th:text="'+' + ${dashboardData.cognitiveTestStats.testsThisMonth}">+2</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg Accuracy</span>
+            <span class="stat-value" th:text="${#numbers.formatDecimal(dashboardData.cognitiveTestStats.averageAccuracy, 1, 1)} + '%'">87.5%</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Last Test</span>
+            <span class="stat-value" th:text="${dashboardData.cognitiveTestStats.lastTestDate != null ? #temporals.format(dashboardData.cognitiveTestStats.lastTestDate, 'MMM d') : 'Never'}">Dec 10</span>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-outline" onclick="switchTab('cognitive')">
+              <span class="material-icons">play_arrow</span>
+              Take Test
+            </button>
+            <button class="btn-outline" onclick="viewHistory()">
+              <span class="material-icons">history</span>
+              View History
+            </button>
+          </div>
+        </div>
+
+        <!-- Blood Tests Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon blood">
+              <span class="material-icons">science</span>
+            </div>
+            <h3 class="card-title">Blood Results</h3>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Total Tests</span>
+            <span class="stat-value" th:text="${dashboardData.bloodTestStats.totalTests}">8</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Abnormal Values</span>
+            <span class="stat-value warning" th:text="${dashboardData.bloodTestStats.abnormalValues}">3</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Last Test</span>
+            <span class="stat-value" th:text="${dashboardData.bloodTestStats.lastTestDate != null ? #temporals.format(dashboardData.bloodTestStats.lastTestDate, 'MMM d') : 'Never'}">Nov 28</span>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-outline" onclick="switchTab('blood')">
+              <span class="material-icons">upload</span>
+              Upload Results
+            </button>
+            <button class="btn-outline" onclick="viewBloodHistory()">
+              <span class="material-icons">history</span>
+              View All
+            </button>
+          </div>
+        </div>
+
+        <!-- Device Data Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon device">
+              <span class="material-icons">fitness_center</span>
+            </div>
+            <h3 class="card-title">Device Data</h3>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg Sleep Score</span>
+            <span class="stat-value" th:text="${#numbers.formatDecimal(dashboardData.deviceDataStats.avgSleepScore, 1, 1)}">7.2</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Avg Heart Rate</span>
+            <span class="stat-value" th:text="${dashboardData.deviceDataStats.avgHeartRate.toInt()} + ' bpm'">72 bpm</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Daily Steps</span>
+            <span class="stat-value" th:text="${dashboardData.deviceDataStats.avgDailySteps.toInt()}">8,247</span>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-outline" onclick="switchTab('devices')">
+              <span class="material-icons">settings</span>
+              Manage Devices
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon cognitive">
+            <span class="material-icons">schedule</span>
+          </div>
+          <h3 class="card-title">Recent Activity</h3>
+        </div>
+        <div th:each="test : ${dashboardData.recentCognitiveTests}">
+          <div class="recent-item">
+            <div class="recent-icon cognitive">
+              <span class="material-icons">psychology</span>
+            </div>
+            <div class="recent-content">
+              <div class="recent-title" th:text="${test.testType}">Task Switching Test</div>
+              <div class="recent-date" th:text="${#temporals.format(test.testDate, 'MMM d, yyyy')}">Dec 10, 2024</div>
+            </div>
+            <div class="recent-status" th:classappend="'status-' + ${test.status.name().toLowerCase()}" th:text="${test.status.name()}">Excellent</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other tabs will be loaded on separate pages -->
+  </main>
+</div>
+
+<!-- Scripts -->
+<script>
+  // Tab switching functionality - navigate to separate pages
+  function switchTab(tabName) {
+    // Navigate to the appropriate page based on tab
+    switch(tabName) {
+      case 'cognitive':
+        window.location.href = '/cognitive-tests';
+        break;
+      case 'blood':
+        window.location.href = '/blood-results';
+        break;
+      case 'devices':
+        window.location.href = '/devices';
+        break;
+      case 'research':
+        window.location.href = '/research';
+        break;
+      case 'profile':
+        window.location.href = '/profile';
+        break;
+    }
+  }
+
+  // Action functions
+  function startCognitiveTest() {
+    window.location.href = '/test';
+  }
+
+  function viewTestHistory() {
+    window.location.href = '/cognitive-tests';
+  }
+
+  function uploadBloodResults() {
+    window.location.href = '/blood-results';
+  }
+
+  function viewBloodHistory() {
+    window.location.href = '/blood-results';
+  }
+
+  function connectAppleWatch() {
+    window.location.href = '/devices';
+  }
+
+  function connectWhoop() {
+    window.location.href = '/devices';
+  }
+
+  function manageDataSharing() {
+    window.location.href = '/research';
+  }
+
+  // Initialize tab switching
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabName = this.getAttribute('data-tab');
+        switchTab(tabName);
+      });
+    });
+  });
+</script>
+</body>
+</html>

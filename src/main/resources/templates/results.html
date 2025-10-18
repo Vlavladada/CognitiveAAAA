@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results - Task Switching Cognitive Test</title>
+    <link rel="stylesheet" href="/css/task-switching.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .results-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #4facfe;
+        }
+        
+        .result-card h3 {
+            margin-top: 0;
+            color: #4facfe;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .interpretation {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .interpretation h3 {
+            color: #4facfe;
+            margin-top: 0;
+        }
+        
+        .interpretation-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #4facfe;
+        }
+        
+        .interpretation-item h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .interpretation-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+        
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4facfe;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3d8bfe;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .performance-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .performance-excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .performance-good {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .performance-average {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .performance-poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <div class="results-header">
+            <h1><span class="material-icons">analytics</span> Test Results</h1>
+            <p>Session completed on <span th:text="${#temporals.format(session.endTime, 'MMM dd, yyyy HH:mm')}"></span></p>
+        </div>
+        
+        <div class="results-grid">
+            <!-- Overall Performance -->
+            <div class="result-card">
+                <h3><span class="material-icons">assessment</span> Overall Performance</h3>
+                <div class="metric">
+                    <span class="metric-label">Accuracy</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.accuracy, 1, 1)} + '%'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Average Response Time</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.averageResponseTime, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Total Trials</span>
+                    <span class="metric-value" th:text="${results.totalTrials}"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Correct Responses</span>
+                    <span class="metric-value" th:text="${results.correctTrials}"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Errors</span>
+                    <span class="metric-value" th:text="${results.errorCount}"></span>
+                </div>
+            </div>
+            
+            <!-- Task Switching Performance -->
+            <div class="result-card">
+                <h3><span class="material-icons">swap_horiz</span> Task Switching</h3>
+                <div class="metric">
+                    <span class="metric-label">Switch Cost</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.switchCost, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Switch Trials Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.switchAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Repeat Trials Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.repeatAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+            </div>
+            
+            <!-- Task Interference -->
+            <div class="result-card">
+                <h3><span class="material-icons">psychology</span> Task Interference</h3>
+                <div class="metric">
+                    <span class="metric-label">Interference Effect</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.taskInterference, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Congruent Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.congruentAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Incongruent Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.incongruentAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+            </div>
+            
+            <!-- Task-Specific Performance -->
+            <div class="result-card">
+                <h3><span class="material-icons">palette</span> Task-Specific Performance</h3>
+                <div class="metric">
+                    <span class="metric-label">Color Task Accuracy</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.colorTaskAccuracy, 1, 1)} + '%'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Color Task Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.colorTaskAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Shape Task Accuracy</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.shapeTaskAccuracy, 1, 1)} + '%'"></span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Shape Task Avg RT</span>
+                    <span class="metric-value" th:text="${#numbers.formatDecimal(results.shapeTaskAvgRT, 1, 1)} + ' ms'"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interpretation -->
+        <div class="interpretation">
+            <h3><span class="material-icons">lightbulb</span> Performance Interpretation</h3>
+            
+            <div class="interpretation-item">
+                <h4>Overall Accuracy</h4>
+                <p th:if="${results.accuracy >= 95}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.accuracy >= 90 and results.accuracy < 95}" class="performance-indicator performance-good">Very Good</p>
+                <p th:if="${results.accuracy >= 85 and results.accuracy < 90}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.accuracy >= 80 and results.accuracy < 85}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.accuracy < 80}" class="performance-indicator performance-poor">Below Average</p>
+                <p>Your accuracy of <strong th:text="${#numbers.formatDecimal(results.accuracy, 1, 1)} + '%'"></strong> indicates 
+                <span th:if="${results.accuracy >= 95}">exceptional attention control and cognitive performance, placing you in the top 10% of performers.</span>
+                <span th:if="${results.accuracy >= 90 and results.accuracy < 95}">very good cognitive performance with strong attention control.</span>
+                <span th:if="${results.accuracy >= 85 and results.accuracy < 90}">good cognitive performance with room for improvement.</span>
+                <span th:if="${results.accuracy >= 80 and results.accuracy < 85}">average cognitive performance that could benefit from practice.</span>
+                <span th:if="${results.accuracy < 80}">cognitive performance below typical ranges, suggesting potential benefits from cognitive training.</span></p>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Task Switching Ability (Cognitive Flexibility)</h4>
+                <p th:if="${results.switchCost <= 30}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.switchCost > 30 and results.switchCost <= 60}" class="performance-indicator performance-good">Very Good</p>
+                <p th:if="${results.switchCost > 60 and results.switchCost <= 100}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.switchCost > 100 and results.switchCost <= 150}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.switchCost > 150}" class="performance-indicator performance-poor">Below Average</p>
+                <p>A switch cost of <strong th:text="${#numbers.formatDecimal(results.switchCost, 1, 1)} + ' ms'"></strong> indicates 
+                <span th:if="${results.switchCost <= 30}">exceptional cognitive flexibility and executive control, suggesting superior ability to adapt to changing task demands.</span>
+                <span th:if="${results.switchCost > 30 and results.switchCost <= 60}">very good cognitive flexibility with minimal switching difficulty.</span>
+                <span th:if="${results.switchCost > 60 and results.switchCost <= 100}">good cognitive flexibility with moderate switching costs typical of healthy adults.</span>
+                <span th:if="${results.switchCost > 100 and results.switchCost <= 150}">average cognitive flexibility with some difficulty switching between tasks.</span>
+                <span th:if="${results.switchCost > 150}">below-average cognitive flexibility, suggesting potential benefits from executive function training.</span></p>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Interference Control (Selective Attention)</h4>
+                <p th:if="${results.taskInterference <= 20}" class="performance-indicator performance-excellent">Excellent</p>
+                <p th:if="${results.taskInterference > 20 and results.taskInterference <= 40}" class="performance-indicator performance-good">Very Good</p>
+                <p th:if="${results.taskInterference > 40 and results.taskInterference <= 70}" class="performance-indicator performance-good">Good</p>
+                <p th:if="${results.taskInterference > 70 and results.taskInterference <= 120}" class="performance-indicator performance-average">Average</p>
+                <p th:if="${results.taskInterference > 120}" class="performance-indicator performance-poor">Below Average</p>
+                <p>An interference effect of <strong th:text="${#numbers.formatDecimal(results.taskInterference, 1, 1)} + ' ms'"></strong> suggests 
+                <span th:if="${results.taskInterference <= 20}">exceptional selective attention and interference control, indicating superior ability to filter out irrelevant information.</span>
+                <span th:if="${results.taskInterference > 20 and results.taskInterference <= 40}">very good interference control with minimal distraction effects.</span>
+                <span th:if="${results.taskInterference > 40 and results.taskInterference <= 70}">good interference control with moderate susceptibility to irrelevant information.</span>
+                <span th:if="${results.taskInterference > 70 and results.taskInterference <= 120}">average interference control with typical susceptibility to distracting information.</span>
+                <span th:if="${results.taskInterference > 120}">below-average interference control, suggesting potential benefits from attention training exercises.</span></p>
+            </div>
+        </div>
+        
+        <!-- Cognitive Assessment Summary -->
+        <div class="interpretation">
+            <h3><span class="material-icons">psychology</span> Cognitive Assessment Summary</h3>
+            
+            <div class="interpretation-item">
+                <h4>Executive Function Profile</h4>
+                <p>This task switching test measures key components of executive function:</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li><strong>Cognitive Flexibility:</strong> Your ability to switch between different mental sets and adapt to changing task demands.</li>
+                    <li><strong>Working Memory:</strong> Your capacity to maintain and manipulate task-relevant information while ignoring distractions.</li>
+                    <li><strong>Inhibitory Control:</strong> Your ability to suppress irrelevant responses and maintain focus on the current task.</li>
+                    <li><strong>Attention Control:</strong> Your capacity to allocate attention appropriately between competing demands.</li>
+                </ul>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Clinical Relevance</h4>
+                <p>Task switching performance is associated with:</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li>Academic and professional success</li>
+                    <li>Problem-solving abilities</li>
+                    <li>Adaptability to new situations</li>
+                    <li>Overall cognitive health and aging</li>
+                </ul>
+                <p><strong>Note:</strong> This test provides a snapshot of your current cognitive abilities. Performance can vary based on factors such as fatigue, stress, motivation, and recent practice. For clinical assessment, multiple testing sessions and additional cognitive measures are typically recommended.</p>
+            </div>
+            
+            <div class="interpretation-item">
+                <h4>Recommendations</h4>
+                <div th:if="${results.accuracy >= 90 and results.switchCost <= 60 and results.taskInterference <= 40}">
+                    <p class="performance-indicator performance-excellent">Excellent Performance</p>
+                    <p>Your cognitive performance is exceptional. To maintain these abilities:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Continue engaging in mentally challenging activities</li>
+                        <li>Practice mindfulness and meditation</li>
+                        <li>Maintain regular physical exercise</li>
+                        <li>Get adequate sleep and manage stress</li>
+                    </ul>
+                </div>
+                <div th:if="${results.accuracy >= 80 and results.switchCost <= 100 and results.taskInterference <= 70}">
+                    <p class="performance-indicator performance-good">Good Performance</p>
+                    <p>Your cognitive performance is solid. To enhance your abilities:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Practice cognitive training exercises</li>
+                        <li>Engage in new learning activities</li>
+                        <li>Try brain-training apps or puzzles</li>
+                        <li>Maintain a healthy lifestyle</li>
+                    </ul>
+                </div>
+                <div th:if="${results.accuracy < 80 or results.switchCost > 100 or results.taskInterference > 70}">
+                    <p class="performance-indicator performance-average">Room for Improvement</p>
+                    <p>Your cognitive performance could benefit from targeted training:</p>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Consider cognitive training programs</li>
+                        <li>Practice attention and focus exercises</li>
+                        <li>Engage in regular mental challenges</li>
+                        <li>Consult with a healthcare provider if concerned</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">
+                <span class="material-icons">home</span>
+                Back to Home
+            </a>
+            <a href="/" class="btn btn-secondary" th:if="${isAuthenticated}">
+                <span class="material-icons">history</span>
+                View All Results
+            </a>
+            <a href="/" class="btn btn-secondary" th:if="${!isAuthenticated}">
+                <span class="material-icons">person_add</span>
+                Sign Up to Save Results
+            </a>
+        </div>
+    </div>
+</body>
+</html>
