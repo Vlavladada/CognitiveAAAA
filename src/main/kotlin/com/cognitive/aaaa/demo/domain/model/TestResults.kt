@@ -38,10 +38,10 @@ data class TestResults(
     val averageResponseTime: Double, // in milliseconds
 
     @Column(nullable = false)
-    val switchCost: Double, // difference between switch and repeat trials
+    val switchCost: Double, // difference between switch and repeat trials ms
 
     @Column(nullable = false)
-    val taskInterference: Double, // difference between incongruent and congruent trials
+    val taskInterference: Double, // difference between incongruent and congruent trials ms
 
     @Column(nullable = false)
     val errorCount: Int,
@@ -59,7 +59,7 @@ data class TestResults(
     val shapeTaskAvgRT: Double,
 
     @Column(nullable = false)
-    val congruentAvgRT: Double,
+    val congruentAvgrt: Double,
 
     @Column(nullable = false)
     val incongruentAvgRT: Double,
@@ -87,7 +87,7 @@ data class TestResults(
         shapeTaskAccuracy = 0.0,
         colorTaskAvgRT = 0.0,
         shapeTaskAvgRT = 0.0,
-        congruentAvgRT = 0.0,
+        congruentAvgrt = 0.0,
         incongruentAvgRT = 0.0,
         switchAvgRT = 0.0,
         repeatAvgRT = 0.0,
