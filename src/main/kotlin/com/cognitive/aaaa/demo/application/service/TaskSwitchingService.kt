@@ -86,7 +86,7 @@ class TaskSwitchingService(
         val session =  testSessionRepository.findById(sessionId)
             .orElseThrow { IllegalArgumentException("Session not found") }
         
-        val trials = trialRepository.findByIdOrderByTrialNumber(session.id!!)
+        val trials = trialRepository.findBySessionIdOrderByTrialNumber(session.id!!)
         return trials.find { it.status == TrialStatus.PENDING }
     }
     
@@ -120,7 +120,7 @@ class TaskSwitchingService(
         val session =  testSessionRepository.findById(sessionId)
             .orElseThrow { IllegalArgumentException("Session not found") }
         
-        val trials = trialRepository.findByIdOrderByTrialNumber(session.id!!)
+        val trials = trialRepository.findBySessionIdOrderByTrialNumber(session.id!!)
         val completedTrials = trials.filter { it.status == TrialStatus.COMPLETED }
         
         val results = calculateResults(session, completedTrials)
@@ -131,7 +131,7 @@ class TaskSwitchingService(
             endTime = LocalDateTime.now(),
             isCompleted = true
         )
-//        testSessionRepository.save(updatedSession)
+        testSessionRepository.save(updatedSession)
         
         // Update user test count
         session.user?.let { user ->
@@ -154,11 +154,15 @@ class TaskSwitchingService(
     }
     
     private fun generateTrials(session: TestSession, isTraining: Boolean): List<Trial> {
-        val trialCount = if (isTraining) 24 else 240 // Training: 24 trials, Test: 240 trials (psychologically valid)
+        val trialCount = if (isTraining) 10 else 20 // TODO: Increase to 180 for full test
         val trials = mutableListOf<Trial>()
         
         // Generate balanced trial sequence following psychological best practices
         val trialSequence = generateBalancedSequence(trialCount, isTraining)
+        
+        // Get existing trials to determine starting trial number
+        val existingTrials = trialRepository.findBySessionIdOrderByTrialNumber(session.id!!)
+        val startTrialNumber = existingTrials.size + 1
         
         for (i in 1..trialCount) {
             val trialSpec = trialSequence[i - 1]
@@ -166,7 +170,7 @@ class TaskSwitchingService(
             val trial = Trial(
                 id = null,
                 session = session,
-                trialNumber = i,
+                trialNumber = startTrialNumber + i - 1,
                 taskType = trialSpec.taskType,
                 stimulusShape = trialSpec.shape,
                 stimulusColor = trialSpec.color,
@@ -201,7 +205,7 @@ class TaskSwitchingService(
         if (isTraining) {
             // Training: Simple alternating pattern with clear examples
             for (i in 1..trialCount) {
-                val taskType = if ((i - 1) / 6 % 2 == 0) TaskType.COLOR else TaskType.SHAPE
+                val taskType = if ((i - 1) / 2 % 2 == 0) TaskType.COLOR else TaskType.SHAPE
                 val shape = shapes[(i - 1) % shapes.size]
                 val color = colors[(i - 1) % colors.size]
                 
@@ -411,7 +415,7 @@ class TaskSwitchingService(
         } else 0.0
         
         return TestResults(
-            id = UUID.randomUUID(),
+            id = null,
             session = session,
             totalTrials = trials.size,
             correctTrials = correctTrials.size,

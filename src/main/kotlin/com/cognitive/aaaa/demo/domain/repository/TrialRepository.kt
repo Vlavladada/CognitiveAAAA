@@ -7,5 +7,5 @@ import java.util.UUID
 
 @Repository
 interface TrialRepository : JpaRepository<Trial, UUID> {
-    fun findByIdOrderByTrialNumber(sessionId: UUID): List<Trial>
+    fun findBySessionIdOrderByTrialNumber(sessionId: UUID): List<Trial>
 }
