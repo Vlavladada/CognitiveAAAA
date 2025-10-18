@@ -16,10 +16,12 @@ import com.cognitive.aaaa.demo.domain.repository.TestSessionRepository
 import com.cognitive.aaaa.demo.domain.repository.TrialRepository
 import com.cognitive.aaaa.demo.domain.repository.UserRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
 
 @Service
+@Transactional
 class TaskSwitchingService(
     private val testSessionRepository: TestSessionRepository,
     private val trialRepository: TrialRepository,
@@ -33,7 +35,7 @@ class TaskSwitchingService(
         } else 1
         
         val session = TestSession(
-            id = UUID.randomUUID(),
+            id = null,
             user = user,
             sessionNumber = sessionNumber,
             status = SessionStatus.CREATED,
@@ -82,7 +84,7 @@ class TaskSwitchingService(
         val session =  testSessionRepository.findById(sessionId)
             .orElseThrow { IllegalArgumentException("Session not found") }
         
-        val trials = trialRepository.findByIdOrderByTrialNumber(session.id)
+        val trials = trialRepository.findByIdOrderByTrialNumber(session.id!!)
         return trials.find { it.status == TrialStatus.PENDING }
     }
     
@@ -116,7 +118,7 @@ class TaskSwitchingService(
         val session =  testSessionRepository.findById(sessionId)
             .orElseThrow { IllegalArgumentException("Session not found") }
         
-        val trials = trialRepository.findByIdOrderByTrialNumber(session.id)
+        val trials = trialRepository.findByIdOrderByTrialNumber(session.id!!)
         val completedTrials = trials.filter { it.status == TrialStatus.COMPLETED }
         
         val results = calculateResults(session, completedTrials)
@@ -127,7 +129,7 @@ class TaskSwitchingService(
             endTime = LocalDateTime.now(),
             isCompleted = true
         )
-        testSessionRepository.save(updatedSession)
+//        testSessionRepository.save(updatedSession)
         
         // Update user test count
         session.user?.let { user ->

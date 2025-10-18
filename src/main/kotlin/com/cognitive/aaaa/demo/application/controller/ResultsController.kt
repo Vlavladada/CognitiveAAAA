@@ -26,7 +26,7 @@ class ResultsController(
             return "redirect:/?error=session_not_found"
         }
 
-        val results = testResultsRepository.findBySessionId(session.id).orElse(null)
+        val results = testResultsRepository.findBySessionId(session.id!!).orElse(null)
         if (results == null) {
             return "redirect:/?error=results_not_found"
         }
@@ -47,7 +47,7 @@ class ResultsController(
             return ResponseEntity.notFound().build()
         }
 
-        val results = testResultsRepository.findBySessionId(session.id).orElse(null)
+        val results = testResultsRepository.findBySessionId(session.id!!).orElse(null)
         return ResponseEntity.ok(results)
     }
 
@@ -61,7 +61,7 @@ class ResultsController(
 
         val sessions = testSessionRepository.findByUserIdAndIsCompletedTrueOrderByStartTimeDesc(user.id)
         val results = sessions.mapNotNull { session ->
-            testResultsRepository.findBySessionId(session.id).orElse(null)
+            testResultsRepository.findBySessionId(session.id!!).orElse(null)
         }
 
         return ResponseEntity.ok(results)

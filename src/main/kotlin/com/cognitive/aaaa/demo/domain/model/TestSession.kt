@@ -10,7 +10,7 @@ import java.util.UUID
 data class TestSession(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID,
+    val id: UUID? = null,
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -39,10 +39,13 @@ data class TestSession(
     
     @OneToMany(mappedBy = "session", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JsonIgnore
-    val trials: List<Trial> = emptyList()
+    val trials: List<Trial> = emptyList(),
+
+    @Version
+    var version: Long? = null
 ) {
     constructor() : this(
-        id = UUID.randomUUID(),
+        id = null,
         user = null,
         sessionNumber = 1,
         status = SessionStatus.CREATED,

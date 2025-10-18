@@ -16,7 +16,7 @@ import java.util.UUID
 data class Trial(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID,
+    val id: UUID? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id", nullable = false)
@@ -64,7 +64,7 @@ data class Trial(
     val isSwitchTrial: Boolean = false,
 ) {
     constructor() : this(
-        id = UUID.randomUUID(),
+        id = null,
         session = TestSession(),
         trialNumber = 0,
         taskType = COLOR,

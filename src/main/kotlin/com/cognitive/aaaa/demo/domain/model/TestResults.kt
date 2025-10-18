@@ -18,7 +18,7 @@ import java.util.UUID
 data class TestResults(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID,
+    val id: UUID? = null,
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id", nullable = false)
@@ -74,7 +74,7 @@ data class TestResults(
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
     constructor() : this(
-        id = UUID.randomUUID(),
+        id = null,
         session = TestSession(),
         totalTrials = 0,
         correctTrials = 0,
