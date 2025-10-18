@@ -1,5 +1,3 @@
-// Task Switching Cognitive Test JavaScript
-
 class TaskSwitchingTest {
     constructor() {
         this.sessionId = null;
@@ -8,8 +6,6 @@ class TaskSwitchingTest {
         this.trials = [];
         this.trialStartTime = null;
         this.isWaitingForResponse = false;
-        
-        // Initialize event listeners immediately - DOM should be ready
         this.initializeEventListeners();
     }
     
@@ -41,8 +37,7 @@ class TaskSwitchingTest {
         });
         
         console.log('Event listeners initialized successfully');
-        
-        // Global keydown listener for debugging
+
         document.addEventListener('keydown', (e) => {
             console.log('Global keydown event:', e.key, 'code:', e.code);
         });
