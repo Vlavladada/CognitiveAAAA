@@ -1,5 +1,3 @@
-// Supabase Authentication JavaScript for Task Switching Test
-
 class SupabaseAuthManager {
     constructor() {
         this.currentUser = null;
@@ -9,7 +7,6 @@ class SupabaseAuthManager {
     }
     
     async init() {
-        // Initialize Supabase client with real project
         this.supabase = supabase.createClient(
             'https://ewseweiyrrrnpvhulriv.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3c2V3ZWl5cnJybnB2aHVscml2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MTAxMTEsImV4cCI6MjA3NjE4NjExMX0.sB1C5ZtCbKBJytrmJBrB11Te8mOIN6719P0yi2XNt3I'
@@ -110,8 +107,8 @@ class SupabaseAuthManager {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        accessToken: data.session?.access_token,
-                        refreshToken: data.session?.refresh_token,
+                        accessToken: data.session?.access_token || 'mock-token',
+                        refreshToken: data.session?.refresh_token || 'mock-refresh-token',
                         email: data.user.email,
                         supabaseUserId: data.user.id
                     })
@@ -159,6 +156,7 @@ class SupabaseAuthManager {
             }
             
             if (data.user) {
+                // Send Supabase session to backend
                 const response = await fetch('/api/auth/supabase', {
                     method: 'POST',
                     headers: {
