@@ -35,12 +35,22 @@ class TaskSwitchingTest {
                 e.preventDefault();
             }
         });
-        
-        console.log('Event listeners initialized successfully');
 
         document.addEventListener('keydown', (e) => {
             console.log('Global keydown event:', e.key, 'code:', e.code);
         });
+    }
+
+    ensureUuid(id) {
+        if (typeof id !== 'string') return null;
+        const s = id.trim().replace(/[{}]/g, '').toLowerCase();
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(s) ? s : null;
+    }
+
+    async readJsonOrText(resp) {
+        const ct = resp.headers.get('content-type') || '';
+        if (ct.includes('application/json')) return { kind: 'json', body: await resp.json() };
+        return { kind: 'text', body: await resp.text() };
     }
     
     async startTest() {
@@ -58,18 +68,35 @@ class TaskSwitchingTest {
                 headers['X-User-ID'] = userId;
             }
             
-            const response = await fetch('/api/session', {
+            const response = (await fetch('/api/session', {
                 method: 'POST',
                 headers: headers,
                 body: ''
-            });
+            }));
             
             if (!response.ok) {
                 throw new Error('Failed to create session');
             }
             
-            const session = await response.json();
-            this.sessionId = session.sessionId;
+            console.log('Session created:', response);
+            const parsed = await readJsonOrText(response);
+            if (parsed.kind !== 'json') {
+                console.error('Non-JSON session response:', parsed.body);
+                alert('Server returned non-JSON for /api/session');
+                return;
+            }
+
+            const session = parsed.body;        // <- actual JSON
+            console.log('Create session payload:', session);
+
+            const normalized = ensureUuid(session?.id); // server returns { id: "<uuid>" }
+            if (!normalized) {
+                console.error('Invalid session id from server:', session?.id);
+                alert('Server returned an invalid session id.');
+                return;
+            }
+
+            this.sessionId = normalized;
             
             // Start training phase
             await this.startTraining();

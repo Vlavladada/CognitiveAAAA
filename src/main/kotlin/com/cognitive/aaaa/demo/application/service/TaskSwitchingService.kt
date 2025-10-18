@@ -44,8 +44,10 @@ class TaskSwitchingService(
             completedTrials = 0,
             isCompleted = false
         )
+
+        val createdSession = testSessionRepository.save(session)
         
-        return testSessionRepository.save(session)
+        return createdSession
     }
     
     fun startTraining(sessionId: UUID): List<Trial> {

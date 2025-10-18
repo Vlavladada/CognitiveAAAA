@@ -29,9 +29,8 @@ class TaskSwitchingController(
     }
     
     @PostMapping("/api/session")
-    @ResponseBody
+//    @ResponseBody
     fun createSession(
-        @RequestParam(required = false) participantId: String?,
         @RequestHeader(value = "X-User-ID", required = false) userId: String?
     ): ResponseEntity<TestSession> {
         val user = if (userId != null) {
@@ -45,33 +44,33 @@ class TaskSwitchingController(
     
     @PostMapping("/api/session/{sessionId}/training")
     @ResponseBody
-    fun startTraining(@PathVariable sessionId: UUID): ResponseEntity<List<Trial>> {
-        val trials = taskSwitchingService.startTraining(sessionId)
+    fun startTraining(@PathVariable sessionId: String): ResponseEntity<List<Trial>> {
+        val trials = taskSwitchingService.startTraining(UUID.fromString(sessionId))
         return ResponseEntity.ok(trials)
     }
     
     @PostMapping("/api/session/{sessionId}/test")
     @ResponseBody
-    fun startTest(@PathVariable sessionId: UUID): ResponseEntity<List<Trial>> {
-        val trials = taskSwitchingService.startTest(sessionId)
+    fun startTest(@PathVariable sessionId: String): ResponseEntity<List<Trial>> {
+        val trials = taskSwitchingService.startTest(UUID.fromString(sessionId))
         return ResponseEntity.ok(trials)
     }
     
     @GetMapping("/api/session/{sessionId}/trial")
     @ResponseBody
-    fun getCurrentTrial(@PathVariable sessionId: UUID): ResponseEntity<Trial?> {
-        val trial = taskSwitchingService.getCurrentTrial(sessionId)
+    fun getCurrentTrial(@PathVariable sessionId: String): ResponseEntity<Trial?> {
+        val trial = taskSwitchingService.getCurrentTrial(UUID.fromString(sessionId))
         return ResponseEntity.ok(trial)
     }
     
     @PostMapping("/api/session/{sessionId}/response")
     @ResponseBody
     fun recordResponse(
-        @PathVariable sessionId: UUID,
+        @PathVariable sessionId: String,
         @RequestBody responseRequest: ResponseRequest
     ): ResponseEntity<Trial?> {
         val trial = taskSwitchingService.recordResponse(
-            sessionId, 
+            UUID.fromString(sessionId),
             responseRequest.response, 
             responseRequest.responseTime
         )
@@ -80,15 +79,15 @@ class TaskSwitchingController(
     
     @PostMapping("/api/session/{sessionId}/complete")
     @ResponseBody
-    fun completeSession(@PathVariable sessionId: UUID): ResponseEntity<TestResults> {
-        val results = taskSwitchingService.completeSession(sessionId)
+    fun completeSession(@PathVariable sessionId: String): ResponseEntity<TestResults> {
+        val results = taskSwitchingService.completeSession(UUID.fromString(sessionId))
         return ResponseEntity.ok(results)
     }
     
     @GetMapping("/api/session/{sessionId}")
     @ResponseBody
-    fun getSession(@PathVariable sessionId: UUID): ResponseEntity<TestSession?> {
-        val session = taskSwitchingService.getSession(sessionId)
+    fun getSession(@PathVariable sessionId: String): ResponseEntity<TestSession?> {
+        val session = taskSwitchingService.getSession(UUID.fromString(sessionId))
         return ResponseEntity.ok(session)
     }
 
