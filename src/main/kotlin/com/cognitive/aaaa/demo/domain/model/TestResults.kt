@@ -53,22 +53,22 @@ data class TestResults(
     val shapeTaskAccuracy: Double,
 
     @Column(nullable = false)
-    val colorTaskAvgRT: Double,
+    val colorTaskAvgRt: Double,
 
     @Column(nullable = false)
-    val shapeTaskAvgRT: Double,
+    val shapeTaskAvgRt: Double,
 
     @Column(nullable = false)
-    val congruentAvgrt: Double,
+    val congruentAvgRt: Double,
 
     @Column(nullable = false)
-    val incongruentAvgRT: Double,
+    val incongruentAvgRt: Double,
 
     @Column(nullable = false)
-    val switchAvgRT: Double,
+    val switchAvgRt: Double,
 
     @Column(nullable = false)
-    val repeatAvgRT: Double,
+    val repeatAvgRt: Double,
 
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()
@@ -85,12 +85,12 @@ data class TestResults(
         errorCount = 0,
         colorTaskAccuracy = 0.0,
         shapeTaskAccuracy = 0.0,
-        colorTaskAvgRT = 0.0,
-        shapeTaskAvgRT = 0.0,
-        congruentAvgrt = 0.0,
-        incongruentAvgRT = 0.0,
-        switchAvgRT = 0.0,
-        repeatAvgRT = 0.0,
+        colorTaskAvgRt = 0.0,
+        shapeTaskAvgRt = 0.0,
+        congruentAvgRt = 0.0,
+        incongruentAvgRt = 0.0,
+        switchAvgRt = 0.0,
+        repeatAvgRt = 0.0,
         createdAt = LocalDateTime.now()
     )
 }

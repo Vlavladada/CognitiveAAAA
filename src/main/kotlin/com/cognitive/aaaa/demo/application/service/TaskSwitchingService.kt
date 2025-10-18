@@ -422,12 +422,12 @@ class TaskSwitchingService(
             errorCount = trials.size - correctTrials.size,
             colorTaskAccuracy = colorTaskAccuracy,
             shapeTaskAccuracy = shapeTaskAccuracy,
-            colorTaskAvgRT = colorTaskAvgRT,
-            shapeTaskAvgRT = shapeTaskAvgRT,
-            congruentAvgRT = congruentAvgRT,
-            incongruentAvgRT = incongruentAvgRT,
-            switchAvgRT = switchAvgRT,
-            repeatAvgRT = repeatAvgRT,
+            colorTaskAvgRt = colorTaskAvgRT,
+            shapeTaskAvgRt = shapeTaskAvgRT,
+            congruentAvgRt = congruentAvgRT,
+            incongruentAvgRt = incongruentAvgRT,
+            switchAvgRt = switchAvgRT,
+            repeatAvgRt = repeatAvgRT,
             createdAt = LocalDateTime.now()
         )
     }
