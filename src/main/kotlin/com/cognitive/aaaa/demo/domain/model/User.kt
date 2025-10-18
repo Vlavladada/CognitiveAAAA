@@ -28,12 +28,12 @@ data class User(
     @Column(nullable = false)
     val totalTestsCompleted: Int = 0,
     
-    val lastLogin: LocalDateTime? = null,
+    val lastLogin: LocalDateTime? = LocalDateTime.now(),
     
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
     
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = LocalDateTime.now()
 ) {
     constructor() : this("", "", UserRole.USER, true, 0, null, LocalDateTime.now(), null)
 }
