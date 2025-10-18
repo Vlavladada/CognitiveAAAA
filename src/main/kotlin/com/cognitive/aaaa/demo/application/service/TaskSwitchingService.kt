@@ -164,7 +164,7 @@ class TaskSwitchingService(
             val trialSpec = trialSequence[i - 1]
             
             val trial = Trial(
-                id = UUID.randomUUID(),
+                id = null,
                 session = session,
                 trialNumber = i,
                 taskType = trialSpec.taskType,

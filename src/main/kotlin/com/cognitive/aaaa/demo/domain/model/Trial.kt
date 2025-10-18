@@ -52,7 +52,7 @@ data class Trial(
 
     val userResponse: Response? = null,
 
-    val responseTimeMs: Long? = null, // in milliseconds
+    val responseTimeMs: Long? = null,
 
     val isCorrect: Boolean? = null,
 
@@ -62,6 +62,9 @@ data class Trial(
     val responseTime: LocalDateTime? = null,
 
     val isSwitchTrial: Boolean = false,
+
+    @Version
+    var version: Long? = null
 ) {
     constructor() : this(
         id = null,
