@@ -1,25 +1,27 @@
-# Build stage
-FROM eclipse-temurin:21-jdk AS builder
+# Use a Maven image to build the application
+FROM maven:3.9.5-eclipse-temurin-21 AS build
+
+# Set the working directory inside the container
 WORKDIR /app
-COPY mvnw ./
-COPY .mvn .mvn
-COPY pom.xml .
-RUN chmod +x ./mvnw
-# copy sources last to leverage layer cache
-COPY src src
 
-# IMPORTANT: skip tests so the build doesn't try to connect to DB/Supabase
-RUN ./mvnw -B -DskipTests -DskipITs clean package
-# If you use spring-boot:repackage, also add -DskipTests there
+# Copy the entire project to the container
+COPY . .
 
-# Runtime stage (distroless or slim base is fine)
-FROM eclipse-temurin:21-jre
+# Build the project
+RUN mvn clean package -DskipTests
+
+# Use a slim Java image to run the application
+FROM amazoncorretto:21
+
+# Set the working directory for the runtime
 WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
 
-# Cloud Run sets PORT; Spring must listen on it
-ENV PORT=8080
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseStringDeduplication"
+# Copy the built JAR file from the Maven build stage
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
+
+ENV PORT 8080
+
+# Run the application
+ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
