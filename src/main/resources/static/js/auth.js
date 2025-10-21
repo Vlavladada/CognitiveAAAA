@@ -271,6 +271,34 @@ class SupabaseAuthManager {
         if (backToInstructionsBtn) {
             backToInstructionsBtn.addEventListener('click', () => this.showInstructions());
         }
+        
+        // Handle device management button
+        const manageDevicesBtn = document.getElementById('manageDevicesBtn');
+        if (manageDevicesBtn) {
+            manageDevicesBtn.addEventListener('click', () => this.showDevices());
+        }
+        
+        // Handle device management buttons
+        const backToInstructionsFromDevicesBtn = document.getElementById('backToInstructionsFromDevicesBtn');
+        if (backToInstructionsFromDevicesBtn) {
+            backToInstructionsFromDevicesBtn.addEventListener('click', () => this.showInstructions());
+        }
+        
+        const startNewTestFromDevicesBtn = document.getElementById('startNewTestFromDevicesBtn');
+        if (startNewTestFromDevicesBtn) {
+            startNewTestFromDevicesBtn.addEventListener('click', () => this.showInstructions());
+        }
+        
+        // Device management buttons
+        const connectDevicesBtn = document.getElementById('connectDevicesBtn');
+        if (connectDevicesBtn) {
+            connectDevicesBtn.addEventListener('click', () => this.connectDevices());
+        }
+        
+        const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
+        if (refreshDevicesBtn) {
+            refreshDevicesBtn.addEventListener('click', () => this.refreshDevices());
+        }
     }
     
     async showHistory() {
@@ -423,11 +451,149 @@ class SupabaseAuthManager {
     showInstructions() {
         // Hide all phases
         document.getElementById('historyPhase')?.classList.add('hidden');
+        document.getElementById('devicesPhase')?.classList.add('hidden');
         document.getElementById('training')?.classList.add('hidden');
         document.getElementById('test')?.classList.add('hidden');
         
         // Show instructions phase
         document.getElementById('instructionsPhase')?.classList.remove('hidden');
+    }
+    
+    async showDevices() {
+        try {
+            // Hide all other phases
+            document.getElementById('instructionsPhase')?.classList.add('hidden');
+            document.getElementById('historyPhase')?.classList.add('hidden');
+            document.getElementById('training')?.classList.add('hidden');
+            document.getElementById('test')?.classList.add('hidden');
+            
+            // Show devices phase
+            document.getElementById('devicesPhase')?.classList.remove('hidden');
+            
+            // Load connected devices
+            await this.loadConnectedDevices();
+            
+        } catch (error) {
+            console.error('Error showing devices:', error);
+        }
+    }
+    
+    async loadConnectedDevices() {
+        try {
+            const response = await fetch('/api/junction/devices');
+            const devices = await response.json();
+            
+            const devicesList = document.getElementById('devicesList');
+            if (!devicesList) return;
+            
+            if (devices.length === 0) {
+                devicesList.innerHTML = `
+                    <div class="no-devices">
+                        <div class="no-devices-icon">
+                            <span class="material-icons">devices_other</span>
+                        </div>
+                        <h3>No Devices Connected</h3>
+                        <p>Connect your wearable devices and health apps to enhance your cognitive assessment.</p>
+                        <p>Supported devices include Apple Health, Google Fit, Fitbit, Garmin, and many more.</p>
+                    </div>
+                `;
+            } else {
+                let devicesHTML = '<div class="devices-grid">';
+                
+                devices.forEach(device => {
+                    const statusClass = device.status === 'connected' ? 'connected' : 'disconnected';
+                    const statusIcon = device.status === 'connected' ? 'check_circle' : 'error';
+                    
+                    devicesHTML += `
+                        <div class="device-card ${statusClass}">
+                            <div class="device-header">
+                                <div class="device-icon">
+                                    <span class="material-icons">${this.getDeviceIcon(device.type)}</span>
+                                </div>
+                                <div class="device-status">
+                                    <span class="material-icons status-icon">${statusIcon}</span>
+                                </div>
+                            </div>
+                            <div class="device-info">
+                                <h4>${device.name}</h4>
+                                <p class="device-provider">${device.provider}</p>
+                                <p class="device-type">${device.type}</p>
+                                ${device.connectedAt ? `<p class="device-date">Connected: ${new Date(device.connectedAt).toLocaleDateString()}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                devicesHTML += '</div>';
+                devicesList.innerHTML = devicesHTML;
+            }
+            
+        } catch (error) {
+            console.error('Error loading devices:', error);
+            const devicesList = document.getElementById('devicesList');
+            if (devicesList) {
+                devicesList.innerHTML = '<div class="error">Error loading devices. Please try again.</div>';
+            }
+        }
+    }
+    
+    getDeviceIcon(deviceType) {
+        const iconMap = {
+            'watch': 'watch',
+            'scale': 'monitor_weight',
+            'thermometer': 'thermostat',
+            'glucose_meter': 'bloodtype',
+            'blood_pressure': 'favorite',
+            'heart_rate': 'favorite',
+            'sleep': 'bedtime',
+            'activity': 'directions_run',
+            'nutrition': 'restaurant',
+            'mindfulness': 'self_improvement'
+        };
+        return iconMap[deviceType.toLowerCase()] || 'devices_other';
+    }
+    
+    async connectDevices() {
+        try {
+            const response = await fetch('/api/junction/link');
+            const data = await response.json();
+            
+            if (data.linkUrl) {
+                // Open Junction Link in a new window
+                const linkWindow = window.open(data.linkUrl, 'junction-link', 'width=800,height=600,scrollbars=yes,resizable=yes');
+                
+                // Check if window is closed and refresh devices
+                const checkClosed = setInterval(() => {
+                    if (linkWindow.closed) {
+                        clearInterval(checkClosed);
+                        this.loadConnectedDevices();
+                    }
+                }, 1000);
+            } else {
+                alert('Failed to generate device connection link. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error connecting devices:', error);
+            alert('Error connecting devices. Please try again.');
+        }
+    }
+    
+    async refreshDevices() {
+        try {
+            const response = await fetch('/api/junction/refresh', {
+                method: 'POST'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                await this.loadConnectedDevices();
+            } else {
+                alert('Failed to refresh devices. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error refreshing devices:', error);
+            alert('Error refreshing devices. Please try again.');
+        }
     }
     
     getPerformanceAssessment(result) {

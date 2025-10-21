@@ -33,9 +33,15 @@ data class User(
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
     
-    val updatedAt: LocalDateTime? = LocalDateTime.now()
+    val updatedAt: LocalDateTime? = LocalDateTime.now(),
+
+    @Column(nullable = true)
+    val junctionUserId: String? = null,
+    
+    @Column(columnDefinition = "TEXT")
+    val connectedDevices: String? = null
 ) {
-    constructor() : this("", "", UserRole.USER, true, 0, null, LocalDateTime.now(), null)
+    constructor() : this("", "", UserRole.USER, true, 0, null, LocalDateTime.now(), null, null, null)
 }
 
 enum class UserRole {

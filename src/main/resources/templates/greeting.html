@@ -151,6 +151,36 @@
                     </div>
                 </div>
 
+                <!-- Device Management Section -->
+                <div class="test-phase hidden" id="devicesPhase">
+                    <h2>Connected Health Devices</h2>
+                    <div class="devices-content">
+                        <div class="devices-intro">
+                            <p>Connect your wearable devices and health apps to enhance your cognitive assessment with additional health data.</p>
+                        </div>
+                        
+                        <div class="devices-actions">
+                            <button id="connectDevicesBtn" class="btn btn-primary">
+                                <span class="material-icons">add_circle</span>
+                                Connect Devices
+                            </button>
+                            <button id="refreshDevicesBtn" class="btn btn-secondary">
+                                <span class="material-icons">refresh</span>
+                                Refresh Devices
+                            </button>
+                        </div>
+                        
+                        <div id="devicesList" class="devices-list">
+                            <div class="loading">Loading connected devices...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="devices-actions">
+                        <button id="backToInstructionsFromDevicesBtn" class="btn btn-secondary">Back to Instructions</button>
+                        <button id="startNewTestFromDevicesBtn" class="btn btn-primary">Start New Test</button>
+                    </div>
+                </div>
+
                 <!-- Previous Results Section -->
                 <div class="test-phase hidden" id="historyPhase">
                     <h2>Your Previous Results</h2>
@@ -160,6 +190,10 @@
                     <div class="history-actions">
                         <button id="backToInstructionsBtn" class="btn btn-secondary">Back to Instructions</button>
                         <button id="startNewTestBtn" class="btn btn-primary">Start New Test</button>
+                        <button id="manageDevicesBtn" class="btn btn-secondary">
+                            <span class="material-icons">devices</span>
+                            Manage Devices
+                        </button>
                     </div>
                 </div>
             </div>
