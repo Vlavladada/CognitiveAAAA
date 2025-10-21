@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Task Switching Cognitive Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/task-switching.css}" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <div id="instructions" class="phase">
+            <div class="container">
+                <div class="test-header">
+                    <div class="test-icon">
+                        <span class="material-icons">psychology</span>
+                    </div>
+                    <h1>Task Switching Cognitive Test</h1>
+                    <p class="test-subtitle">Assessing Executive Function & Cognitive Flexibility</p>
+                </div>
+                
+                <div class="instruction-section">
+                    <div class="instruction-header">
+                        <h2><span class="material-icons">info</span> Instructions</h2>
+                        <p>This scientifically-validated test measures your cognitive flexibility, attention control, and executive function.</p>
+                    </div>
+                    
+                    <div class="task-rules">
+                        <div class="rule">
+                            <div class="rule-header">
+                                <span class="material-icons">palette</span>
+                                <h4>Color Task</h4>
+                            </div>
+                            <div class="rule-content">
+                                <div class="response-rule">
+                                    <span class="key-indicator">B</span>
+                                    <span class="material-icons">arrow_forward</span>
+                                    <span class="color-yellow">YELLOW</span>
+                                </div>
+                                <div class="response-rule">
+                                    <span class="key-indicator">N</span>
+                                    <span class="material-icons">arrow_forward</span>
+                                    <span class="color-blue">BLUE</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rule">
+                            <div class="rule-header">
+                                <span class="material-icons">category</span>
+                                <h4>Shape Task</h4>
+                            </div>
+                            <div class="rule-content">
+                                <div class="response-rule">
+                                    <span class="key-indicator">B</span>
+                                    <span class="material-icons">arrow_forward</span>
+                                    <span class="shape-circle">CIRCLES</span>
+                                </div>
+                                <div class="response-rule">
+                                    <span class="key-indicator">N</span>
+                                    <span class="material-icons">arrow_forward</span>
+                                    <span class="shape-rectangle">RECTANGLES</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="important-info">
+                        <h3><span class="material-icons">priority_high</span> Important</h3>
+                        <ul>
+                            <li><span class="material-icons">visibility</span> You will see a cue before each trial indicating which task to perform</li>
+                            <li><span class="material-icons">speed</span> Respond as quickly and accurately as possible</li>
+                            <li><span class="material-icons">timer</span> You have 2 seconds to respond to each stimulus</li>
+                            <li><span class="material-icons">school</span> There will be a training phase (24 trials) followed by the actual test (240 trials)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="participant-input">
+                        <div class="input-group">
+                            <span class="material-icons input-icon">person</span>
+                            <input type="text" id="participantId" placeholder="Enter your participant ID (optional)">
+                        </div>
+                    </div>
+                    
+                    <button id="startBtn" class="btn-primary">
+                        <span class="material-icons">play_arrow</span>
+                        Start Cognitive Assessment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Phase -->
+        <div id="training" class="phase hidden">
+            <div class="container">
+                <h2>Training Phase</h2>
+                <p>Practice the tasks. You will complete 24 trials to familiarize yourself with the task.</p>
+                <div id="trainingProgress" class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+                <div id="trainingTrial" class="trial-container">
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Phase -->
+        <div id="test" class="phase hidden">
+            <div class="container">
+                <h2>Test Phase</h2>
+                <p>Now perform the actual test. You will complete 180 trials for accurate cognitive assessment.</p>
+                <div id="testProgress" class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+                <div id="testTrial" class="trial-container">
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Phase -->
+        <div id="results" class="phase hidden">
+            <div class="container">
+                <h2>Test Results</h2>
+                <div id="resultsContent">
+                </div>
+                <button id="restartBtn" class="btn-primary">Start New Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/task-switching.js}"></script>
+</body>
+</html>
