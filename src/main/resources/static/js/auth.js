@@ -480,7 +480,17 @@ class SupabaseAuthManager {
     
     async loadConnectedDevices() {
         try {
-            const response = await fetch('/api/junction/devices');
+            // Get current user ID for authentication
+            const userId = this.currentUser?.supabaseUserId;
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (userId) {
+                headers['X-User-ID'] = userId;
+            }
+            
+            const response = await fetch('/api/junction/devices', { headers });
             
             if (!response.ok) {
                 if (response.status === 400) {
@@ -567,7 +577,17 @@ class SupabaseAuthManager {
     
     async connectDevices() {
         try {
-            const response = await fetch('/api/junction/link');
+            // Get current user ID for authentication
+            const userId = this.currentUser?.supabaseUserId;
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (userId) {
+                headers['X-User-ID'] = userId;
+            }
+            
+            const response = await fetch('/api/junction/link', { headers });
             
             if (!response.ok) {
                 if (response.status === 400) {
@@ -608,9 +628,29 @@ class SupabaseAuthManager {
     
     async refreshDevices() {
         try {
+            // Get current user ID for authentication
+            const userId = this.currentUser?.supabaseUserId;
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (userId) {
+                headers['X-User-ID'] = userId;
+            }
+            
             const response = await fetch('/api/junction/refresh', {
-                method: 'POST'
+                method: 'POST',
+                headers: headers
             });
+            
+            if (!response.ok) {
+                if (response.status === 400) {
+                    alert('Please sign in to refresh devices.');
+                    return;
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
             if (data.success) {
@@ -620,7 +660,7 @@ class SupabaseAuthManager {
             }
         } catch (error) {
             console.error('Error refreshing devices:', error);
-            alert('Error refreshing devices. Please try again.');
+            alert(`Error refreshing devices: ${error.message}. Please try again.`);
         }
     }
     
