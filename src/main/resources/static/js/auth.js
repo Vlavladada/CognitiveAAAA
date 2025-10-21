@@ -481,6 +481,18 @@ class SupabaseAuthManager {
     async loadConnectedDevices() {
         try {
             const response = await fetch('/api/junction/devices');
+            
+            if (!response.ok) {
+                if (response.status === 400) {
+                    const devicesList = document.getElementById('devicesList');
+                    if (devicesList) {
+                        devicesList.innerHTML = '<div class="error">Please sign in to view connected devices.</div>';
+                    }
+                    return;
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const devices = await response.json();
             
             const devicesList = document.getElementById('devicesList');
@@ -532,7 +544,7 @@ class SupabaseAuthManager {
             console.error('Error loading devices:', error);
             const devicesList = document.getElementById('devicesList');
             if (devicesList) {
-                devicesList.innerHTML = '<div class="error">Error loading devices. Please try again.</div>';
+                devicesList.innerHTML = `<div class="error">Error loading devices: ${error.message}</div>`;
             }
         }
     }
@@ -556,25 +568,41 @@ class SupabaseAuthManager {
     async connectDevices() {
         try {
             const response = await fetch('/api/junction/link');
+            
+            if (!response.ok) {
+                if (response.status === 400) {
+                    const errorData = await response.json();
+                    if (errorData.error === "User not authenticated") {
+                        alert('Please sign in to connect devices.');
+                        return;
+                    }
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
             if (data.linkUrl) {
                 // Open Junction Link in a new window
                 const linkWindow = window.open(data.linkUrl, 'junction-link', 'width=800,height=600,scrollbars=yes,resizable=yes');
                 
-                // Check if window is closed and refresh devices
-                const checkClosed = setInterval(() => {
-                    if (linkWindow.closed) {
-                        clearInterval(checkClosed);
-                        this.loadConnectedDevices();
-                    }
-                }, 1000);
+                if (linkWindow) {
+                    // Check if window is closed and refresh devices
+                    const checkClosed = setInterval(() => {
+                        if (linkWindow.closed) {
+                            clearInterval(checkClosed);
+                            this.loadConnectedDevices();
+                        }
+                    }, 1000);
+                } else {
+                    alert('Popup blocked! Please allow popups for this site and try again.');
+                }
             } else {
                 alert('Failed to generate device connection link. Please try again.');
             }
         } catch (error) {
             console.error('Error connecting devices:', error);
-            alert('Error connecting devices. Please try again.');
+            alert(`Error connecting devices: ${error.message}. Please try again.`);
         }
     }
     

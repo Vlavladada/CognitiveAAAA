@@ -1748,6 +1748,21 @@ input:focus {
     line-height: 1.6;
 }
 
+.error {
+    text-align: center;
+    padding: 20px;
+    color: var(--error-600);
+    background: var(--error-50);
+    border: 1px solid var(--error-200);
+    border-radius: var(--radius-lg);
+    margin: 20px 0;
+}
+
+.error::before {
+    content: "⚠️ ";
+    font-size: 1.2em;
+}
+
 /* Responsive adjustments for detailed results */
 @media (max-width: 768px) {
     .detailed-grid {
