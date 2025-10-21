@@ -354,6 +354,8 @@ class TaskSwitchingTest {
             if (window.authManager && window.authManager.isAuthenticated) {
                 // User is authenticated, show the history view
                 await window.authManager.showHistory();
+                // Reset test state
+                this.resetTestState();
             } else {
                 // User is not authenticated, redirect to results page
                 window.location.href = `/results/${this.sessionId}`;
@@ -466,6 +468,31 @@ class TaskSwitchingTest {
         this.isWaitingForResponse = false;
         
         this.showPhase('instructionsPhase');
+    }
+    
+    resetTestState() {
+        this.sessionId = null;
+        this.currentPhase = 'instructions';
+        this.currentTrialIndex = 0;
+        this.trials = [];
+        this.trialStartTime = null;
+        this.isWaitingForResponse = false;
+        
+        // Clear any trial containers
+        const trainingTrial = document.getElementById('trainingTrial');
+        const testTrial = document.getElementById('testTrial');
+        if (trainingTrial) trainingTrial.innerHTML = '';
+        if (testTrial) testTrial.innerHTML = '';
+        
+        // Reset progress bars
+        const trainingProgress = document.getElementById('trainingProgress');
+        const testProgress = document.getElementById('testProgress');
+        if (trainingProgress) {
+            trainingProgress.style.setProperty('--progress-width', '0%');
+        }
+        if (testProgress) {
+            testProgress.style.setProperty('--progress-width', '0%');
+        }
     }
 }
 

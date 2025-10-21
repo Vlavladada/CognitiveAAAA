@@ -372,8 +372,10 @@ class SupabaseAuthManager {
                 historyContent.innerHTML = historyHTML;
             }
             
-            // Show history phase
+            // Hide all test phases and show history phase
             document.getElementById('instructionsPhase')?.classList.add('hidden');
+            document.getElementById('training')?.classList.add('hidden');
+            document.getElementById('test')?.classList.add('hidden');
             document.getElementById('historyPhase')?.classList.remove('hidden');
             
             // Add event listener for start new test button if it doesn't exist
@@ -416,7 +418,12 @@ class SupabaseAuthManager {
     }
     
     showInstructions() {
+        // Hide all phases
         document.getElementById('historyPhase')?.classList.add('hidden');
+        document.getElementById('training')?.classList.add('hidden');
+        document.getElementById('test')?.classList.add('hidden');
+        
+        // Show instructions phase
         document.getElementById('instructionsPhase')?.classList.remove('hidden');
     }
     
