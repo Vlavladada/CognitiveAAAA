@@ -1,7 +1,4 @@
-/* Task Switching Cognitive Test Styles - Luxury Spa Aesthetic */
-
 :root {
-    /* Luxury Spa Color Palette - Soft, Feminine, Elegant Blue */
     --primary-50: #f0f9ff;
     --primary-100: #e0f2fe;
     --primary-200: #bae6fd;
@@ -153,7 +150,6 @@ body {
     display: none;
 }
 
-/* Enhanced Material UI Test Header */
 .test-header {
     text-align: center;
     margin-bottom: var(--spacing-8);
@@ -1411,7 +1407,6 @@ input:focus {
     border: 1px solid var(--error-200);
 }
 
-/* Update CSS for progress bar */
 .progress-bar::after {
     width: var(--progress-width, 0%) !important;
 }
