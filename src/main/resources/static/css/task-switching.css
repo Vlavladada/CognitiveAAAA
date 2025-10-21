@@ -1410,3 +1410,161 @@ input:focus {
 .progress-bar::after {
     width: var(--progress-width, 0%) !important;
 }
+
+/* Enhanced History View Styles */
+.latest-result {
+    border-left-color: var(--primary-500) !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(139, 92, 246, 0.05));
+    box-shadow: var(--elevation-3);
+}
+
+.latest-badge {
+    background: var(--primary-500);
+    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.7em;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.detailed-results {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--primary-200);
+}
+
+.detailed-results h5 {
+    color: var(--primary-700);
+    margin: 0 0 15px 0;
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detailed-results h5::before {
+    content: "📊";
+    font-size: 18px;
+}
+
+.detailed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.detail-section {
+    background: white;
+    padding: 15px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--elevation-1);
+}
+
+.detail-section h6 {
+    color: var(--primary-600);
+    margin: 0 0 10px 0;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-metric {
+    display: flex;
+    flex-direction: column;
+    margin: 8px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--neutral-100);
+}
+
+.detail-metric:last-child {
+    border-bottom: none;
+}
+
+.detail-metric .label {
+    font-size: var(--font-size-xs);
+    color: var(--neutral-600);
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.detail-metric .value {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-800);
+    font-weight: 600;
+}
+
+.interpretation {
+    background: var(--primary-50);
+    border: 1px solid var(--primary-200);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.interpretation h6 {
+    color: var(--primary-700);
+    margin: 0 0 10px 0;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.interpretation h6::before {
+    content: "💡";
+    font-size: 14px;
+}
+
+.assessment-text {
+    margin: 0;
+    color: var(--neutral-700);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    font-style: italic;
+}
+
+/* History Actions */
+.history-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--neutral-200);
+}
+
+.history-actions .btn {
+    min-width: 150px;
+}
+
+/* Responsive adjustments for detailed results */
+@media (max-width: 768px) {
+    .detailed-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-section {
+        padding: 12px;
+    }
+    
+    .detailed-results {
+        padding: 15px;
+    }
+    
+    .history-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .history-actions .btn {
+        width: 100%;
+        max-width: 200px;
+    }
+}

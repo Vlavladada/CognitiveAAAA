@@ -350,8 +350,14 @@ class TaskSwitchingTest {
             
             const results = await response.json();
             
-            // Redirect to results page
-            window.location.href = `/results/${this.sessionId}`;
+            // Navigate to the history view within the main app
+            if (window.authManager && window.authManager.isAuthenticated) {
+                // User is authenticated, show the history view
+                await window.authManager.showHistory();
+            } else {
+                // User is not authenticated, redirect to results page
+                window.location.href = `/results/${this.sessionId}`;
+            }
             
         } catch (error) {
             console.error('Error getting results:', error);

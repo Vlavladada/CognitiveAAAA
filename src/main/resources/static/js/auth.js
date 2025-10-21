@@ -303,10 +303,12 @@ class SupabaseAuthManager {
                 
                 results.forEach((result, index) => {
                     const date = new Date(result.createdAt).toLocaleDateString();
+                    const isLatest = index === 0; // Most recent result
+                    
                     historyHTML += `
-                        <div class="result-item">
+                        <div class="result-item ${isLatest ? 'latest-result' : ''}">
                             <div class="result-header">
-                                <h4>Test #${results.length - index}</h4>
+                                <h4>Test #${results.length - index} ${isLatest ? '<span class="latest-badge">Latest</span>' : ''}</h4>
                                 <span class="result-date">${date}</span>
                             </div>
                             <div class="result-summary">
@@ -327,6 +329,41 @@ class SupabaseAuthManager {
                                     <span class="value">${result.taskInterference.toFixed(0)} ms</span>
                                 </div>
                             </div>
+                            ${isLatest ? `
+                                <div class="detailed-results">
+                                    <h5>Detailed Performance</h5>
+                                    <div class="detailed-grid">
+                                        <div class="detail-section">
+                                            <h6>Task Performance</h6>
+                                            <div class="detail-metric">
+                                                <span class="label">Color Task:</span>
+                                                <span class="value">${result.colorTaskAccuracy.toFixed(1)}% accuracy, ${result.colorTaskAvgRt.toFixed(0)}ms avg RT</span>
+                                            </div>
+                                            <div class="detail-metric">
+                                                <span class="label">Shape Task:</span>
+                                                <span class="value">${result.shapeTaskAccuracy.toFixed(1)}% accuracy, ${result.shapeTaskAvgRt.toFixed(0)}ms avg RT</span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-section">
+                                            <h6>Cognitive Metrics</h6>
+                                            <div class="detail-metric">
+                                                <span class="label">Congruent Trials:</span>
+                                                <span class="value">${result.congruentAvgRt.toFixed(0)}ms avg RT</span>
+                                            </div>
+                                            <div class="detail-metric">
+                                                <span class="label">Incongruent Trials:</span>
+                                                <span class="value">${result.incongruentAvgRt.toFixed(0)}ms avg RT</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="interpretation">
+                                        <h6>Performance Assessment</h6>
+                                        <p class="assessment-text">
+                                            ${this.getPerformanceAssessment(result)}
+                                        </p>
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 });
@@ -338,6 +375,15 @@ class SupabaseAuthManager {
             // Show history phase
             document.getElementById('instructionsPhase')?.classList.add('hidden');
             document.getElementById('historyPhase')?.classList.remove('hidden');
+            
+            // Add event listener for start new test button if it doesn't exist
+            const startNewTestBtn = document.getElementById('startNewTestBtn');
+            if (startNewTestBtn && !startNewTestBtn.hasAttribute('data-listener-added')) {
+                startNewTestBtn.addEventListener('click', () => {
+                    this.showInstructions();
+                });
+                startNewTestBtn.setAttribute('data-listener-added', 'true');
+            }
             
         } catch (error) {
             console.error('Error loading history:', error);
@@ -372,6 +418,51 @@ class SupabaseAuthManager {
     showInstructions() {
         document.getElementById('historyPhase')?.classList.add('hidden');
         document.getElementById('instructionsPhase')?.classList.remove('hidden');
+    }
+    
+    getPerformanceAssessment(result) {
+        let assessment = '';
+        
+        // Overall accuracy assessment
+        if (result.accuracy >= 95) {
+            assessment += 'Excellent overall accuracy (95%+) indicates exceptional attention control. ';
+        } else if (result.accuracy >= 90) {
+            assessment += 'Very good accuracy (90%+) shows strong cognitive performance. ';
+        } else if (result.accuracy >= 85) {
+            assessment += 'Good accuracy (85%+) with room for improvement. ';
+        } else if (result.accuracy >= 80) {
+            assessment += 'Average accuracy (80%+) suggests potential benefits from practice. ';
+        } else {
+            assessment += 'Below-average accuracy suggests potential benefits from cognitive training. ';
+        }
+        
+        // Switch cost assessment
+        if (result.switchCost <= 30) {
+            assessment += 'Exceptional cognitive flexibility with minimal switching difficulty. ';
+        } else if (result.switchCost <= 60) {
+            assessment += 'Very good cognitive flexibility. ';
+        } else if (result.switchCost <= 100) {
+            assessment += 'Good cognitive flexibility typical of healthy adults. ';
+        } else if (result.switchCost <= 150) {
+            assessment += 'Average cognitive flexibility with some switching difficulty. ';
+        } else {
+            assessment += 'Below-average cognitive flexibility, suggesting potential benefits from executive function training. ';
+        }
+        
+        // Interference assessment
+        if (result.taskInterference <= 20) {
+            assessment += 'Excellent interference control with superior ability to filter distractions.';
+        } else if (result.taskInterference <= 40) {
+            assessment += 'Very good interference control with minimal distraction effects.';
+        } else if (result.taskInterference <= 70) {
+            assessment += 'Good interference control with moderate susceptibility to irrelevant information.';
+        } else if (result.taskInterference <= 120) {
+            assessment += 'Average interference control with typical susceptibility to distractions.';
+        } else {
+            assessment += 'Below-average interference control, suggesting potential benefits from attention training.';
+        }
+        
+        return assessment;
     }
 }
 
