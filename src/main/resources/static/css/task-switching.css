@@ -1418,6 +1418,32 @@ input:focus {
     box-shadow: var(--elevation-3);
 }
 
+.clickable-header {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    margin: -20px -20px 15px -20px;
+    border-radius: 12px 12px 0 0;
+    background: rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid var(--neutral-200);
+}
+
+.clickable-header:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+}
+
+.expand-icon {
+    font-size: 14px;
+    color: var(--primary-500);
+    transition: transform 0.3s ease;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
 .latest-badge {
     background: var(--primary-500);
     color: white;
@@ -1434,6 +1460,23 @@ input:focus {
     background: rgba(255, 255, 255, 0.8);
     border-radius: var(--radius-lg);
     border: 1px solid var(--primary-200);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.detailed-results.expanded {
+    max-height: 1000px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.detailed-results.collapsed {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    padding: 0 20px;
+    margin-top: 0;
+    border: none;
 }
 
 .detailed-results h5 {

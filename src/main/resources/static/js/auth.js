@@ -304,12 +304,14 @@ class SupabaseAuthManager {
                 results.forEach((result, index) => {
                     const date = new Date(result.createdAt).toLocaleDateString();
                     const isLatest = index === 0; // Most recent result
+                    const testId = `test-${index}`;
                     
                     historyHTML += `
-                        <div class="result-item ${isLatest ? 'latest-result' : ''}">
-                            <div class="result-header">
+                        <div class="result-item ${isLatest ? 'latest-result' : ''}" data-test-id="${testId}">
+                            <div class="result-header clickable-header" data-test-id="${testId}">
                                 <h4>Test #${results.length - index} ${isLatest ? '<span class="latest-badge">Latest</span>' : ''}</h4>
                                 <span class="result-date">${date}</span>
+                                <span class="expand-icon" data-test-id="${testId}">▼</span>
                             </div>
                             <div class="result-summary">
                                 <div class="summary-metric">
@@ -329,41 +331,39 @@ class SupabaseAuthManager {
                                     <span class="value">${result.taskInterference.toFixed(0)} ms</span>
                                 </div>
                             </div>
-                            ${isLatest ? `
-                                <div class="detailed-results">
-                                    <h5>Detailed Performance</h5>
-                                    <div class="detailed-grid">
-                                        <div class="detail-section">
-                                            <h6>Task Performance</h6>
-                                            <div class="detail-metric">
-                                                <span class="label">Color Task:</span>
-                                                <span class="value">${result.colorTaskAccuracy.toFixed(1)}% accuracy, ${result.colorTaskAvgRt.toFixed(0)}ms avg RT</span>
-                                            </div>
-                                            <div class="detail-metric">
-                                                <span class="label">Shape Task:</span>
-                                                <span class="value">${result.shapeTaskAccuracy.toFixed(1)}% accuracy, ${result.shapeTaskAvgRt.toFixed(0)}ms avg RT</span>
-                                            </div>
+                            <div class="detailed-results ${isLatest ? 'expanded' : 'collapsed'}" data-test-id="${testId}">
+                                <h5>Detailed Performance</h5>
+                                <div class="detailed-grid">
+                                    <div class="detail-section">
+                                        <h6>Task Performance</h6>
+                                        <div class="detail-metric">
+                                            <span class="label">Color Task:</span>
+                                            <span class="value">${result.colorTaskAccuracy.toFixed(1)}% accuracy, ${result.colorTaskAvgRt.toFixed(0)}ms avg RT</span>
                                         </div>
-                                        <div class="detail-section">
-                                            <h6>Cognitive Metrics</h6>
-                                            <div class="detail-metric">
-                                                <span class="label">Congruent Trials:</span>
-                                                <span class="value">${result.congruentAvgRt.toFixed(0)}ms avg RT</span>
-                                            </div>
-                                            <div class="detail-metric">
-                                                <span class="label">Incongruent Trials:</span>
-                                                <span class="value">${result.incongruentAvgRt.toFixed(0)}ms avg RT</span>
-                                            </div>
+                                        <div class="detail-metric">
+                                            <span class="label">Shape Task:</span>
+                                            <span class="value">${result.shapeTaskAccuracy.toFixed(1)}% accuracy, ${result.shapeTaskAvgRt.toFixed(0)}ms avg RT</span>
                                         </div>
                                     </div>
-                                    <div class="interpretation">
-                                        <h6>Performance Assessment</h6>
-                                        <p class="assessment-text">
-                                            ${this.getPerformanceAssessment(result)}
-                                        </p>
+                                    <div class="detail-section">
+                                        <h6>Cognitive Metrics</h6>
+                                        <div class="detail-metric">
+                                            <span class="label">Congruent Trials:</span>
+                                            <span class="value">${result.congruentAvgRt.toFixed(0)}ms avg RT</span>
+                                        </div>
+                                        <div class="detail-metric">
+                                            <span class="label">Incongruent Trials:</span>
+                                            <span class="value">${result.incongruentAvgRt.toFixed(0)}ms avg RT</span>
+                                        </div>
                                     </div>
                                 </div>
-                            ` : ''}
+                                <div class="interpretation">
+                                    <h6>Performance Assessment</h6>
+                                    <p class="assessment-text">
+                                        ${this.getPerformanceAssessment(result)}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
@@ -386,6 +386,9 @@ class SupabaseAuthManager {
                 });
                 startNewTestBtn.setAttribute('data-listener-added', 'true');
             }
+            
+            // Add click event listeners for expandable result items
+            this.addExpandableListeners();
             
         } catch (error) {
             console.error('Error loading history:', error);
@@ -470,6 +473,57 @@ class SupabaseAuthManager {
         }
         
         return assessment;
+    }
+    
+    addExpandableListeners() {
+        // Add click listeners to all result headers
+        const clickableHeaders = document.querySelectorAll('.clickable-header');
+        clickableHeaders.forEach(header => {
+            header.addEventListener('click', (e) => {
+                const testId = e.currentTarget.getAttribute('data-test-id');
+                this.toggleDetailedResults(testId);
+            });
+        });
+    }
+    
+    toggleDetailedResults(testId) {
+        // Close all other expanded results
+        const allDetailedResults = document.querySelectorAll('.detailed-results');
+        const allExpandIcons = document.querySelectorAll('.expand-icon');
+        
+        allDetailedResults.forEach(details => {
+            if (details.getAttribute('data-test-id') !== testId) {
+                details.classList.remove('expanded');
+                details.classList.add('collapsed');
+            }
+        });
+        
+        allExpandIcons.forEach(icon => {
+            if (icon.getAttribute('data-test-id') !== testId) {
+                icon.textContent = '▼';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+        
+        // Toggle the clicked result
+        const targetDetails = document.querySelector(`.detailed-results[data-test-id="${testId}"]`);
+        const targetIcon = document.querySelector(`.expand-icon[data-test-id="${testId}"]`);
+        
+        if (targetDetails && targetIcon) {
+            if (targetDetails.classList.contains('expanded')) {
+                // Collapse
+                targetDetails.classList.remove('expanded');
+                targetDetails.classList.add('collapsed');
+                targetIcon.textContent = '▼';
+                targetIcon.style.transform = 'rotate(0deg)';
+            } else {
+                // Expand
+                targetDetails.classList.remove('collapsed');
+                targetDetails.classList.add('expanded');
+                targetIcon.textContent = '▲';
+                targetIcon.style.transform = 'rotate(0deg)';
+            }
+        }
     }
 }
 
