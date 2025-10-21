@@ -327,9 +327,6 @@ class SupabaseAuthManager {
                                     <span class="value">${result.taskInterference.toFixed(0)} ms</span>
                                 </div>
                             </div>
-                            <div class="result-actions">
-                                <a href="/results/${result.session.sessionId}" class="btn btn-sm btn-primary">View Details</a>
-                            </div>
                         </div>
                     `;
                 });
