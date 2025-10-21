@@ -144,10 +144,10 @@ class JunctionService(
                 userRepository.save(updatedUser)
             }
             
-            // Generate a Junction Link URL
-            // For testing purposes, we'll create a mock link URL
+            // Generate Junction Link URL using the correct format
+            // Junction Link URLs use the tryvital.io domain for device connection
             val linkId = UUID.randomUUID().toString()
-            val linkUrl = "https://sandbox.tryvital.io/link?user_id=$junctionUserId&link_id=$linkId"
+            val linkUrl = "https://tryvital.io/link?user_id=$junctionUserId&link_id=$linkId"
             
             println("Generated Junction link: $linkUrl")
             return linkUrl
