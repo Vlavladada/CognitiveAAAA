@@ -40,6 +40,7 @@ class SecurityConfig(
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/api/session/**").permitAll()
                     .requestMatchers("/api/user/**").permitAll()
+                    .requestMatchers("/api/junction/**").permitAll()
                     .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
                     .anyRequest().authenticated()
             }
