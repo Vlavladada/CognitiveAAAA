@@ -4,7 +4,6 @@ import com.cognitive.aaaa.demo.application.service.AuthenticationService
 import com.cognitive.aaaa.demo.domain.repository.UserRepository
 import com.cognitive.aaaa.demo.infra.VitalProvider
 import com.cognitive.aaaa.demo.infra.service.JunctionService
-import com.cognitive.aaaa.demo.infra.service.SupabaseAuthService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
