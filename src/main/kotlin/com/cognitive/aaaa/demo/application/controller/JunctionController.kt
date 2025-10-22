@@ -23,8 +23,7 @@ class JunctionController(
     ): ResponseEntity<Map<String, String>> {
         try {
             println("JunctionController: Received link request for userId: ${linkRequest.userId}")
-            
-            // Check if user exists in our database
+
             if (!userRepository.existsById(linkRequest.userId)) {
                 println("JunctionController: User not found in database: ${linkRequest.userId}")
                 return ResponseEntity.badRequest().body(mapOf("error" to "User not found"))
