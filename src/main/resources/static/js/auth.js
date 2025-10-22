@@ -579,15 +579,27 @@ class SupabaseAuthManager {
         try {
             // Get current user ID for authentication
             const userId = this.currentUser?.supabaseUserId;
-            const headers = {
-                'Content-Type': 'application/json'
-            };
             
-            if (userId) {
-                headers['X-User-ID'] = userId;
+            if (!userId) {
+                alert('Please sign in to connect devices.');
+                return;
             }
             
-            const response = await fetch('/api/junction/link', { headers });
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-User-ID': userId
+            };
+            
+            const requestBody = {
+                userId: userId,
+                redirectUrl: window.location.origin + '/junction-callback'
+            };
+            
+            const response = await fetch('/api/junction/link', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
             
             if (!response.ok) {
                 if (response.status === 400) {
