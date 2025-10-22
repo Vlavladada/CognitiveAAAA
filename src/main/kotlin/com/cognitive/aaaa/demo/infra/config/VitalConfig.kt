@@ -17,7 +17,13 @@ class VitalConfig {
     
     @Bean
     fun vitalClient(): Vital {
-        val environmentEnum =  Environment.SANDBOX
+        
+        val environmentEnum = Environment.SANDBOX_EU
+
+        
+        println("VitalConfig: Creating Vital client with API key: ${apiKey.take(10)}...")
+        println("VitalConfig: Environment: $environmentEnum")
+        
         return Vital.builder()
             .apiKey(apiKey)
             .environment(environmentEnum)
