@@ -94,10 +94,8 @@ class JunctionService(
                 )
                 userRepository.save(updatedUser)
             }
-            
-            // Generate Vital Link Token using the Vital SDK
+
             return vitalProvider.link(vitalUserId, "https://your-app.com/callback")
-            
         } catch (e: Exception) {
             println("Error generating Vital link: ${e.message}")
             e.printStackTrace()
